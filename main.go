@@ -12,7 +12,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("+%v\n", store)
+	if err := store.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("+%v\n", *store)
 	server := NewAPIServer(":3000", store)
+	fmt.Println("server created")
 	server.Run()
 }	
