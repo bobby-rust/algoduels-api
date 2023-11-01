@@ -2,11 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 )
 
 func main() {
 	fmt.Println("Heoo")
+	store, err := NewPostgresStore()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	server := NewAPIServer(":3000")
+	fmt.Printf("+%v\n", store)
+	server := NewAPIServer(":3000", store)
 	server.Run()
 }	
