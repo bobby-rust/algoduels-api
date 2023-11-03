@@ -42,11 +42,12 @@ func (s* PostgresStore) Init() error {
 func (s* PostgresStore) createAccountTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS Account (
-			ID SERIAL PRIMARY KEY,
+			user_id SERIAL PRIMARY KEY,
 			first_name VARCHAR(50),
 			last_name VARCHAR(50),
 			username VARCHAR(50),
 			email VARCHAR(50),
+			encrypted_password VARCHAR(50),
 			created_at TIMESTAMP
 		)
 	`
@@ -62,12 +63,13 @@ func (s *PostgresStore) CreateAccount(acc *Account) error {
 				last_name,
 				username,
 				email,
+				encryped_password,
 				created_at
 			) 
-			VALUES ($1, $2, $3, $4, $5)
+			VALUES ($1, $2, $3, $4, $5, $6)
 		`
 	
-	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.CreatedAt)
+	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -132,7 +134,7 @@ func (s *PostgresStore) GetAccounts() ([]*Account, error) {
 
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 	account := new(Account)
-	err := rows.Scan(&account.ID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.CreatedAt)
+	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.CreatedAt)
 
 	return account, err
 }

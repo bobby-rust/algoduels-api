@@ -5,12 +5,13 @@ import (
 )
 
 type Account struct {
-	ID        int 	 	`json:"id"`
-	FirstName string 	`json:"firstName"`
-	LastName  string 	`json:"lastName"`
-	Username  string 	`json:"username"`
-	Email	  string 	`json:"email"`
-	CreatedAt time.Time `json:"createdAt"`
+	UserID        		int   	  `json:"user_id"`
+	FirstName 			string 	  `json:"firstName"`
+	LastName  			string 	  `json:"lastName"`
+	Username  			string 	  `json:"username"`
+	Email	  			string 	  `json:"email"`
+	EncryptedPassword	string	  `json:"encryptedPassword"`
+	CreatedAt 			time.Time `json:"createdAt"`
 }
 
 type CreateAccountRequest struct {
@@ -18,14 +19,16 @@ type CreateAccountRequest struct {
 	LastName  string
 	Username  string
 	Email 	  string
+	Password  string
 }
 
-func NewAccount(firstName, lastName, username, email string) *Account {
+func NewAccount(firstName, lastName, username, email, password string) *Account {
 	return &Account{
-		FirstName: firstName,
-		LastName:  lastName,
-		Username:  username,
-		Email: 	   email,
-		CreatedAt: time.Now().UTC(),
+		FirstName: 		   firstName,
+		LastName:  		   lastName,
+		Username:  		   username,
+		Email: 	   		   email,
+		EncryptedPassword:  password,
+		CreatedAt: 		   time.Now().UTC(),
 	}
 }

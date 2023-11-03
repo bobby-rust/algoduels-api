@@ -80,18 +80,15 @@ func (s *APIServer) handleGetAccount(w http.ResponseWriter, r *http.Request) err
 }
 
 func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) error {
-	createAccountReq := new(CreateAccountRequest)
+	req := new(CreateAccountRequest)
 
-	if err := json.NewDecoder(r.Body).Decode(createAccountReq); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		return err
 	}
-	
-	fmt.Printf("%+v\n", *createAccountReq)
-
 	defer r.Body.Close()
 
-	// account := &Account{} // same exaact thing as new()
-	account := NewAccount(createAccountReq.FirstName, createAccountReq.LastName, createAccountReq.Username, createAccountReq.Email)
+	// account := &Account{} // same exact thing as new()
+	account := NewAccount(req.FirstName, req.LastName, req.Username, req.Email, req.Password)
 	if err := s.store.CreateAccount(account); err != nil {
 		return err
 	}
@@ -125,7 +122,6 @@ func commonMiddleware(next http.Handler) http.Handler {
 
 func WriteJSON(w http.ResponseWriter, status int, v any) error {
 	w.WriteHeader(status)
-
 	return json.NewEncoder(w).Encode(v)
 }
 
@@ -145,11 +141,11 @@ func makeHTTPHandlerFunc(f apiFunc) http.HandlerFunc {
 }
 
 func getID(r *http.Request) (int, error) {
-	idStr := mux.Vars(r)["id"]
+	idStr := mux.Vars(r)["user_id"]
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
-		return id, fmt.Errorf("Invalid ID %s", idStr)
+		return id, fmt.Errorf("Invalid user_id %s", idStr)
 	}
 
 	return id, nil
