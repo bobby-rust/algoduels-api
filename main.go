@@ -3,10 +3,17 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+
+	"github.com/Valgard/godotenv"
 )
 
 func main() {
-	fmt.Println("Heoo")
+	dotenv := godotenv.New()
+	if err := dotenv.Load(".env"); err != nil {
+		panic(err)
+	}
+
 	store, err := NewPostgresStore()
 	if err != nil {
 		log.Fatal(err)
@@ -16,8 +23,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("+%v\n", *store)
-	server := NewAPIServer(":3000", store)
-	fmt.Println("server created")
+	port := os.Getenv("PORT")
+	server := NewAPIServer(port, store)
+	fmt.Printf("Server running on port %s", port)
 	server.Run()
 }	

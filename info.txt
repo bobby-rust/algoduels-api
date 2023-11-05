@@ -1,0 +1,14 @@
+30 minute timer per duel
+the match does not end until the 30 minutes are up, or both users are finished
+the match will be scored on a combination of time to complete, mem usage, and runtime
+    - maybe score runtime very lightly, rounding a lot due to inconsistency to the nearest say 100 ms or so
+
+first minimum working sprint goal:
+    1. user accounts
+    2. code editor
+    3. problem descriptions, difficulty
+    4. test cases
+    5. run code
+    6. get runtime, mem, io
+
+next will be duels without matchmaking (challenge a friend with link)
