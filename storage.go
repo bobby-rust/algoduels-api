@@ -15,7 +15,9 @@ type Storage interface {
 	GetAccounts() ([]*Account, error)
 	UpdateAccount(*Account) error
 	DeleteAccount(int) error
-	// front end will not delete any of these, so i have chosen to omit delete routes
+
+	/* --- Front end will not delete any of these below, so i have chosen to omit delete routes --- */
+	
 	// Problem CRU - no need for delete 
 	CreateProblem(*Problem) error
 	GetProblemByID(int) (*Problem, error)
@@ -26,13 +28,13 @@ type Storage interface {
 	CreateTestCase(*TestCase) error
 	GetTestCaseByID(int) (*TestCase, error)
 	GetTestCases() ([]*TestCase, error)
-	UpdateTestCase(*TestCase) error 
+	UpdateTestCase(*TestCase) error
+
 	// Submission CRU - no need for delete 
 	CreateSubmission(*Submission) error
 	GetSubmissionByID(int) (*Submission, error)
 	GetSubmissions() ([]*Submission, error)
-	UpdateSubmissions(*Submission) error
-
+	UpdateSubmission(*Submission) error
 }
 
 type PostgresStore struct {
@@ -59,7 +61,20 @@ func NewPostgresStore() (*PostgresStore, error) {
 }
 
 func (s* PostgresStore) Init() error {
-	return s.createAccountTable()
+	tableCreationFuncs := []func() error {
+		s.createAccountTable,
+		s.createProblemTable,
+		s.createTestCaseTable,
+		s.createSubmissionTable,
+	}
+	
+	for _, f := range tableCreationFuncs {
+		if err := f(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s* PostgresStore) createAccountTable() error {
@@ -123,24 +138,22 @@ func (s* PostgresStore) createSubmissionTable() error {
 	`
 
 	_, err := s.db.Exec(query);
-	return err;	
+	return err;
 }
 
 // -- Account Create -- 
 func (s *PostgresStore) CreateAccount(acc *Account) error {
 	query := `
 			INSERT INTO Account (
-				first_name,
-				last_name,
 				username,
 				email,
 				encryped_password,
 				created_at
 			) 
-			VALUES ($1, $2, $3, $4, $5, $6)
+			VALUES ($1, $2, $3, $4)
 		`
 	
-	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
+	_, err := s.db.Query(query, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -207,20 +220,17 @@ func (s *PostgresStore) DeleteAccount(id int) error {
 }
 
 // --  Problem Create -- 
-func (s *PostgresStore) CreateProblem(acc *Account) error {
+func (s *PostgresStore) CreateProblem(prob *Problem) error {
 	query := `
-			INSERT INTO Account (
-				first_name,
-				last_name,
-				username,
-				email,
-				encryped_password,
-				created_at
+			INSERT INTO Problem (
+				prompt,
+				starter_code,
+				difficulty
 			) 
-			VALUES ($1, $2, $3, $4, $5, $6)
+			VALUES ($1, $2, $3)
 		`
 	
-	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
+	_, err := s.db.Query(query, prob.Prompt, prob.StarterCode, prob.Difficulty)
 	if err != nil {
 		return err
 	}
@@ -229,8 +239,8 @@ func (s *PostgresStore) CreateProblem(acc *Account) error {
 }
 
 // -- Problem Read -- 
-func (s *PostgresStore) GetProblemByID(id int) (*Account, error) {
-	query := `SELECT * FROM Account WHERE ID=$1`
+func (s *PostgresStore) GetProblemByID(id int) (*Problem, error) {
+	query := `SELECT * FROM Problem WHERE ID=$1`
 
 	rows, err := s.db.Query(query, id)
 
@@ -239,14 +249,14 @@ func (s *PostgresStore) GetProblemByID(id int) (*Account, error) {
 	}
 
 	for rows.Next() {
-		return scanIntoAccount(rows)
+		return scanIntoProblem(rows)
 	}
 	
 	return nil, fmt.Errorf("Account %d not found", id)
 }
 
-func (s *PostgresStore) GetProblems() ([]*Account, error) {
-	query := `SELECT * FROM Account`
+func (s *PostgresStore) GetProblems() ([]*Problem, error) {
+	query := `SELECT * FROM Problem`
 
 	rows, err := s.db.Query(query)
 
@@ -254,27 +264,180 @@ func (s *PostgresStore) GetProblems() ([]*Account, error) {
 		return nil, err
 	}
 
-	accounts := []*Account{}
+	problems := []*Problem{}
 
 	for rows.Next() {
-		account, err := scanIntoAccount(rows)	
+		problem, err := scanIntoProblem(rows)	
 		if err != nil {
 			return nil, err
 		}
-		accounts = append(accounts, account)
+		problems = append(problems, problem)
 	}
 
-	return accounts, nil
+	return problems, nil
 }
 
 // -- Problem Update -- 
-func (s *PostgresStore) UpdateProblem(*Account) error {
+func (s *PostgresStore) UpdateProblem(*Problem) error {
+	return nil
+}
+
+// --  Problem Create -- 
+func (s *PostgresStore) CreateTestCase(test *TestCase) error {
+	query := `
+			INSERT INTO TestCase (
+				problem_id, 
+				input,
+				output
+			) 
+			VALUES ($1, $2, $3)
+		`
+	
+	_, err := s.db.Query(query, test.ProblemID, test.Input, test.Output)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// -- Problem Read -- 
+func (s *PostgresStore) GetTestCaseByID(id int) (*TestCase, error) {
+	query := `SELECT * FROM TestCase WHERE ID=$1`
+
+	rows, err := s.db.Query(query, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		return scanIntoTestCase(rows)
+	}
+	
+	return nil, fmt.Errorf("Test case %d not found", id)
+}
+
+func (s *PostgresStore) GetTestCases() ([]*TestCase, error) {
+	query := `SELECT * FROM TestCase`
+
+	rows, err := s.db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	testCases := []*TestCase{}
+
+	for rows.Next() {
+		testCase, err := scanIntoTestCase(rows)	
+		if err != nil {
+			return nil, err
+		}
+		testCases = append(testCases, testCase)
+	}
+
+	return testCases, nil
+}
+
+// -- TestCase Update -- 
+func (s *PostgresStore) UpdateTestCase(*TestCase) error {
+	return nil
+}
+
+// --  Problem Create -- 
+func (s *PostgresStore) CreateSubmission(sub *Submission) error {
+	query := `
+			INSERT INTO Submission (
+				user_id,
+				problem_id,
+				submitted_at,
+				code,
+				language,
+				is_accepted,
+				exec_time_ms,
+				mem_usage_kb
+			) 
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		`
+	
+	_, err := s.db.Query(query, sub.UserID, sub.ProblemID, sub.SubmittedAt, sub.Code, sub.Language, sub.IsAccepted, sub.ExecTimeMS, sub.MemUsageKB)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// -- Problem Read -- 
+func (s *PostgresStore) GetSubmissionByID(id int) (*Submission, error) {
+	query := `SELECT * FROM Submission WHERE ID=$1`
+
+	rows, err := s.db.Query(query, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		return scanIntoSubmission(rows)
+	}
+	
+	return nil, fmt.Errorf("Submission %d not found", id)
+}
+
+func (s *PostgresStore) GetSubmissions() ([]*Submission, error) {
+	query := `SELECT * FROM Submission`
+
+	rows, err := s.db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	subs := []*Submission{}
+
+	for rows.Next() {
+		sub, err := scanIntoSubmission(rows)	
+		if err != nil {
+			return nil, err
+		}
+		subs = append(subs, sub)
+	}
+
+	return subs, nil
+}
+
+// -- Problem Update -- 
+func (s *PostgresStore) UpdateSubmission(*Submission) error {
 	return nil
 }
 
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 	account := new(Account)
-	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.CreatedAt)
+	err := rows.Scan(&account.UserID, &account.Username, &account.Email, &account.CreatedAt)
 
 	return account, err
 }
+
+func scanIntoSubmission(rows *sql.Rows) (*Submission, error) {
+	sub := new(Submission)
+	err := rows.Scan(&sub.UserID, &sub.ProblemID, &sub.SubmittedAt, &sub.Code, &sub.Language, &sub.IsAccepted, &sub.ExecTimeMS, &sub.MemUsageKB)
+
+	return sub, err
+}
+
+func scanIntoTestCase(rows *sql.Rows) (*TestCase, error) {
+	tc := new(TestCase)
+	err := rows.Scan(&tc.ProblemID, &tc.Input, &tc.Output)
+
+	return tc, err
+}
+
+func scanIntoProblem(rows *sql.Rows) (*Problem, error) {
+	p := new(Problem)
+	err := rows.Scan(&p.Prompt, &p.StarterCode, &p.Difficulty)
+
+	return p, err
+}
+
