@@ -24,7 +24,7 @@ func main() {
 	}
 
 	port := os.Getenv("PORT")
-	server := NewAPIServer(port, store)
+	server := NewAPIServer(":" + port, store)
 	fmt.Printf("Server running on port %s", port)
 	server.Run()
-}	
+}
