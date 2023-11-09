@@ -28,7 +28,7 @@ func (s *APIServer) Run() {
 
 	router.HandleFunc("/account", makeHTTPHandlerFunc(s.handleAccount))
 	router.HandleFunc("/account/{id}", makeHTTPHandlerFunc(s.handleAccountByID))
-	
+	router.HandleFunc("/run", makeHTTPHandlerFunc(s.handleRunCode))
 	log.Println("JSON API server running on port: ", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, router)
 }

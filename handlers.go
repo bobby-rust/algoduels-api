@@ -101,6 +101,7 @@ func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) 
 	if err := s.store.CreateProblem(problem); err != nil {
 		return err
 	}
+
 	return WriteJSON(w, http.StatusCreated, problem)
 }
 
@@ -136,8 +137,39 @@ func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request)
 	return WriteJSON(w, http.StatusCreated, testCase)
 }
 
-func (s *APIServer) handleRunCode(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleGetSubmissionByID(w http.ResponseWriter, r *http.Request) error {
+	id, err := getID(r)
+	if err != nil {
+		return err
+	}
 
+	testCase, err := s.store.GetSubmissionByID(id)
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, testCase)
+}
+
+func (s *APIServer) handleCreateSubmission(w http.ResponseWriter, r *http.Request) error {
+	// req := new(CreateSubmissionRequest)
+	//
+	// if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	// 	return err
+	// }
+	// defer r.Body.Close()
+	//
+	// // account := &Account{} // same exact thing as new()
+	// sub := NewSubmission(req.UserID, req.ProblemID, req.Code, req.Language)
+	// if err := s.store.CreateSubmission(sub); err != nil {
+	// 	return err
+	// }
+	//
+	// return WriteJSON(w, http.StatusCreated, sub)
+	return nil
+}
+
+func (s* APIServer) handleGetSubmissions(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
