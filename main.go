@@ -26,7 +26,7 @@ func main() {
 	fmt.Println("Store initialized...")
 	// port := os.Getenv("PORT")
 	port := "3000"
-	server := NewAPIServer(":" + port, store)
+	server := NewAPIServer(":"+port, store)
 	fmt.Printf("Server running on port %s", port)
 	server.Run()
 }

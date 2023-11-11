@@ -169,7 +169,7 @@ func (s *APIServer) handleCreateSubmission(w http.ResponseWriter, r *http.Reques
 	return nil
 }
 
-func (s* APIServer) handleGetSubmissions(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleGetSubmissions(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 

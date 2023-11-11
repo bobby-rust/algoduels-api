@@ -17,12 +17,12 @@ type Storage interface {
 	DeleteAccount(int) error
 
 	/* --- Front end will not delete any of these below, so i have chosen to omit delete routes --- */
-	
-	// Problem CRU - no need for delete 
+
+	// Problem CRU - no need for delete
 	CreateProblem(*Problem) error
 	GetProblemByID(int) (*Problem, error)
 	GetProblems() ([]*Problem, error)
-	UpdateProblem(*Problem) error 
+	UpdateProblem(*Problem) error
 
 	// TestCase CRU - no need for delete
 	CreateTestCase(*TestCase) error
@@ -30,7 +30,7 @@ type Storage interface {
 	GetTestCases() ([]*TestCase, error)
 	UpdateTestCase(*TestCase) error
 
-	// Submission CRU - no need for delete 
+	// Submission CRU - no need for delete
 	CreateSubmission(*Submission) error
 	GetSubmissionByID(int) (*Submission, error)
 	GetSubmissions() ([]*Submission, error)
@@ -47,7 +47,7 @@ func NewPostgresStore() (*PostgresStore, error) {
 	// dbPass := os.Getenv("DB_PASS")
 	// connStr := fmt.Sprintf("host=172.26.234.216 user=%s dbname=%s password=%s sslmode=disable", dbUser, dbName, dbPass)
 	// db, err := sql.Open("postgres", connStr)
-	db, err := sql.Open("postgres", "host=172.26.234.216 user=judge0 dbname=judge0 password=test sslmode=disable")
+	db, err := sql.Open("postgres", "host=172.24.97.50 user=judge0 dbname=judge0 password=test sslmode=disable")
 	if err != nil {
 		return nil, err
 	}
@@ -61,14 +61,14 @@ func NewPostgresStore() (*PostgresStore, error) {
 	}, nil
 }
 
-func (s* PostgresStore) Init() error {
-	tableCreationFuncs := []func() error {
+func (s *PostgresStore) Init() error {
+	tableCreationFuncs := []func() error{
 		s.createAccountTable,
 		s.createProblemTable,
 		s.createTestCaseTable,
 		s.createSubmissionTable,
 	}
-	
+
 	for _, f := range tableCreationFuncs {
 		if err := f(); err != nil {
 			return err
@@ -78,7 +78,7 @@ func (s* PostgresStore) Init() error {
 	return nil
 }
 
-func (s* PostgresStore) createAccountTable() error {
+func (s *PostgresStore) createAccountTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS Account (
 			user_id SERIAL PRIMARY KEY,
@@ -91,11 +91,11 @@ func (s* PostgresStore) createAccountTable() error {
 		)
 	`
 
-	_, err := s.db.Exec(query);
+	_, err := s.db.Exec(query)
 	return err
 }
 
-func (s* PostgresStore) createProblemTable() error {
+func (s *PostgresStore) createProblemTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS Problem (
 			problem_id SERIAL PRIMARY KEY,
@@ -105,11 +105,11 @@ func (s* PostgresStore) createProblemTable() error {
 		)
 	`
 
-	_, err := s.db.Exec(query);
-	return err;
+	_, err := s.db.Exec(query)
+	return err
 }
 
-func (s* PostgresStore) createTestCaseTable() error {
+func (s *PostgresStore) createTestCaseTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS TestCase (
 			test_id SERIAL PRIMARY KEY,
@@ -119,11 +119,11 @@ func (s* PostgresStore) createTestCaseTable() error {
 		)
 	`
 
-	_, err := s.db.Exec(query);
-	return err;
+	_, err := s.db.Exec(query)
+	return err
 }
 
-func (s* PostgresStore) createSubmissionTable() error {
+func (s *PostgresStore) createSubmissionTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS Submission (
 			submission_id SERIAL PRIMARY KEY,
@@ -138,11 +138,11 @@ func (s* PostgresStore) createSubmissionTable() error {
 		)
 	`
 
-	_, err := s.db.Exec(query);
-	return err;
+	_, err := s.db.Exec(query)
+	return err
 }
 
-// -- Account Create -- 
+// -- Account Create --
 func (s *PostgresStore) CreateAccount(acc *Account) error {
 	query := `
 			INSERT INTO Account (
@@ -153,7 +153,7 @@ func (s *PostgresStore) CreateAccount(acc *Account) error {
 			) 
 			VALUES ($1, $2, $3, $4)
 		`
-	
+
 	_, err := s.db.Query(query, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (s *PostgresStore) CreateAccount(acc *Account) error {
 	return nil
 }
 
-// -- Account Read -- 
+// -- Account Read --
 func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
 	query := `SELECT * FROM Account WHERE ID=$1`
 
@@ -175,7 +175,7 @@ func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
 	for rows.Next() {
 		return scanIntoAccount(rows)
 	}
-	
+
 	return nil, fmt.Errorf("Account %d not found", id)
 }
 
@@ -191,7 +191,7 @@ func (s *PostgresStore) GetAccounts() ([]*Account, error) {
 	accounts := []*Account{}
 
 	for rows.Next() {
-		account, err := scanIntoAccount(rows)	
+		account, err := scanIntoAccount(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -201,7 +201,7 @@ func (s *PostgresStore) GetAccounts() ([]*Account, error) {
 	return accounts, nil
 }
 
-// -- Account Update -- 
+// -- Account Update --
 func (s *PostgresStore) UpdateAccount(*Account) error {
 	return nil
 }
@@ -217,10 +217,10 @@ func (s *PostgresStore) DeleteAccount(id int) error {
 		return err
 	}
 
-	return nil	
+	return nil
 }
 
-// --  Problem Create -- 
+// --  Problem Create --
 func (s *PostgresStore) CreateProblem(prob *Problem) error {
 	query := `
 			INSERT INTO Problem (
@@ -230,7 +230,7 @@ func (s *PostgresStore) CreateProblem(prob *Problem) error {
 			) 
 			VALUES ($1, $2, $3)
 		`
-	
+
 	_, err := s.db.Query(query, prob.Prompt, prob.StarterCode, prob.Difficulty)
 	if err != nil {
 		return err
@@ -239,7 +239,7 @@ func (s *PostgresStore) CreateProblem(prob *Problem) error {
 	return nil
 }
 
-// -- Problem Read -- 
+// -- Problem Read --
 func (s *PostgresStore) GetProblemByID(id int) (*Problem, error) {
 	query := `SELECT * FROM Problem WHERE ID=$1`
 
@@ -252,7 +252,7 @@ func (s *PostgresStore) GetProblemByID(id int) (*Problem, error) {
 	for rows.Next() {
 		return scanIntoProblem(rows)
 	}
-	
+
 	return nil, fmt.Errorf("Account %d not found", id)
 }
 
@@ -268,7 +268,7 @@ func (s *PostgresStore) GetProblems() ([]*Problem, error) {
 	problems := []*Problem{}
 
 	for rows.Next() {
-		problem, err := scanIntoProblem(rows)	
+		problem, err := scanIntoProblem(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -278,12 +278,12 @@ func (s *PostgresStore) GetProblems() ([]*Problem, error) {
 	return problems, nil
 }
 
-// -- Problem Update -- 
+// -- Problem Update --
 func (s *PostgresStore) UpdateProblem(*Problem) error {
 	return nil
 }
 
-// --  Problem Create -- 
+// --  Problem Create --
 func (s *PostgresStore) CreateTestCase(test *TestCase) error {
 	query := `
 			INSERT INTO TestCase (
@@ -293,7 +293,7 @@ func (s *PostgresStore) CreateTestCase(test *TestCase) error {
 			) 
 			VALUES ($1, $2, $3)
 		`
-	
+
 	_, err := s.db.Query(query, test.ProblemID, test.Input, test.Output)
 	if err != nil {
 		return err
@@ -302,7 +302,7 @@ func (s *PostgresStore) CreateTestCase(test *TestCase) error {
 	return nil
 }
 
-// -- Problem Read -- 
+// -- Problem Read --
 func (s *PostgresStore) GetTestCaseByID(id int) (*TestCase, error) {
 	query := `SELECT * FROM TestCase WHERE ID=$1`
 
@@ -315,7 +315,7 @@ func (s *PostgresStore) GetTestCaseByID(id int) (*TestCase, error) {
 	for rows.Next() {
 		return scanIntoTestCase(rows)
 	}
-	
+
 	return nil, fmt.Errorf("Test case %d not found", id)
 }
 
@@ -331,7 +331,7 @@ func (s *PostgresStore) GetTestCases() ([]*TestCase, error) {
 	testCases := []*TestCase{}
 
 	for rows.Next() {
-		testCase, err := scanIntoTestCase(rows)	
+		testCase, err := scanIntoTestCase(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -341,12 +341,12 @@ func (s *PostgresStore) GetTestCases() ([]*TestCase, error) {
 	return testCases, nil
 }
 
-// -- TestCase Update -- 
+// -- TestCase Update --
 func (s *PostgresStore) UpdateTestCase(*TestCase) error {
 	return nil
 }
 
-// --  Problem Create -- 
+// --  Problem Create --
 func (s *PostgresStore) CreateSubmission(sub *Submission) error {
 	query := `
 			INSERT INTO Submission (
@@ -361,7 +361,7 @@ func (s *PostgresStore) CreateSubmission(sub *Submission) error {
 			) 
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		`
-	
+
 	_, err := s.db.Query(query, sub.UserID, sub.ProblemID, sub.SubmittedAt, sub.Code, sub.Language, sub.IsAccepted, sub.ExecTimeMS, sub.MemUsageKB)
 	if err != nil {
 		return err
@@ -370,7 +370,7 @@ func (s *PostgresStore) CreateSubmission(sub *Submission) error {
 	return nil
 }
 
-// -- Problem Read -- 
+// -- Problem Read --
 func (s *PostgresStore) GetSubmissionByID(id int) (*Submission, error) {
 	query := `SELECT * FROM Submission WHERE ID=$1`
 
@@ -383,7 +383,7 @@ func (s *PostgresStore) GetSubmissionByID(id int) (*Submission, error) {
 	for rows.Next() {
 		return scanIntoSubmission(rows)
 	}
-	
+
 	return nil, fmt.Errorf("Submission %d not found", id)
 }
 
@@ -399,7 +399,7 @@ func (s *PostgresStore) GetSubmissions() ([]*Submission, error) {
 	subs := []*Submission{}
 
 	for rows.Next() {
-		sub, err := scanIntoSubmission(rows)	
+		sub, err := scanIntoSubmission(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -409,7 +409,7 @@ func (s *PostgresStore) GetSubmissions() ([]*Submission, error) {
 	return subs, nil
 }
 
-// -- Problem Update -- 
+// -- Problem Update --
 func (s *PostgresStore) UpdateSubmission(*Submission) error {
 	return nil
 }
@@ -441,4 +441,3 @@ func scanIntoProblem(rows *sql.Rows) (*Problem, error) {
 
 	return p, err
 }
-

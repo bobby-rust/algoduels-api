@@ -12,23 +12,24 @@ import (
 
 type APIServer struct {
 	listenAddr string
-	store 	   Storage
+	store      Storage
 }
 
 func NewAPIServer(listenAddr string, store Storage) *APIServer {
 	return &APIServer{
 		listenAddr: listenAddr,
-		store: 		store,
+		store:      store,
 	}
 }
 
 func (s *APIServer) Run() {
 	router := mux.NewRouter()
+
+	router.HandleFunc("/run", makeHTTPHandlerFunc(s.handleRunCode))
 	router.Use(commonMiddleware)
 
 	router.HandleFunc("/account", makeHTTPHandlerFunc(s.handleAccount))
 	router.HandleFunc("/account/{id}", makeHTTPHandlerFunc(s.handleAccountByID))
-	router.HandleFunc("/run", makeHTTPHandlerFunc(s.handleRunCode))
 	log.Println("JSON API server running on port: ", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, router)
 }
@@ -47,7 +48,7 @@ type ApiError struct {
 func makeHTTPHandlerFunc(f apiFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := f(w, r); err != nil {
-			// handle error 
+			// handle error
 			WriteJSON(w, http.StatusBadRequest, ApiError{Error: err.Error()})
 		}
 	}
