@@ -23,7 +23,7 @@ type RunCodeRequest struct {
 type GetOutputResp struct {
 	Stdout        string  `json:"stdout"`
 	Time          string  `json:"time"`
-	Memory        int `json:"memory"`
+	Memory        int     `json:"memory"`
 	Stderr        *string `json:"stderr"`
 	Token         string  `json:"token"`
 	CompileOutput string  `json:"compile_output"`
@@ -41,17 +41,17 @@ type CreateSubmissionResp struct {
 func pollJudge0Submission(url string) (*GetOutputResp, error) {
 	timeout := 10 * time.Second
 	startTime := time.Now()
-  time.Sleep(int64(time.Second) * int64(1.0 / 1.5))
+	time.Sleep(time.Second)
 	ran := 0
 
 	for time.Since(startTime) < timeout {
-    time.Sleep(time.Second * 1)
-    fmt.Println("Making GET request...")
+		time.Sleep(time.Second * 1)
+		fmt.Println("Making GET request...")
 		outputResp, err := http.Get(url)
 		ran++
 		if err != nil {
 			fmt.Println("Error during GET request, retrying... ")
-      continue
+			continue
 		}
 
 		/* Parse get submission response */
@@ -62,14 +62,14 @@ func pollJudge0Submission(url string) (*GetOutputResp, error) {
 			fmt.Printf("ran %d times", ran)
 			return nil, outputErr
 		}
-    defer outputResp.Body.Close()
+		defer outputResp.Body.Close()
 
 		if outputRespStruct.Status.ID == 3 {
-      fmt.Println("Response: ", outputRespStruct)
+			fmt.Println("Response: ", outputRespStruct)
 			return outputRespStruct, nil
 		} else {
-      fmt.Println("Status.Description: ", outputRespStruct.Status.Description)
-    }
+			fmt.Println("Status.Description: ", outputRespStruct.Status.Description)
+		}
 	}
 
 	return nil, errors.New("Time limit exceeded")
@@ -107,7 +107,7 @@ func runCode(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	/* Extract token */
-	token := j0CreateSubmissionRespStruct.Token 
+	token := j0CreateSubmissionRespStruct.Token
 	fmt.Println(token)
 
 	/* url to retrieve code output */
@@ -121,8 +121,8 @@ func runCode(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 	// fmt.Println("GET response: ", outputResp)
-  o := outputResp.Stdout 
-  fmt.Println(o)
+	o := outputResp.Stdout
+	fmt.Println(o)
 	// body, err := io.ReadAll(outputResp.Body)
 	// if err != nil {
 	// 	log.Fatal(err)

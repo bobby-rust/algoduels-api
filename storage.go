@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	// "os"
+	"github.com/joho/godotenv"
+	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -42,12 +44,22 @@ type PostgresStore struct {
 }
 
 func NewPostgresStore() (*PostgresStore, error) {
-	// dbName := os.Getenv("DB_NAME")
-	// dbUser := os.Getenv("DB_USER")
-	// dbPass := os.Getenv("DB_PASS")
-	// connStr := fmt.Sprintf("host=172.26.234.216 user=%s dbname=%s password=%s sslmode=disable", dbUser, dbName, dbPass)
-	// db, err := sql.Open("postgres", connStr)
-	db, err := sql.Open("postgres", "host=172.26.234.216 user=judge0 dbname=judge0 password=test sslmode=disable")
+	/* Load environment variables */
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASS")
+	dbIP := os.Getenv("JUDGE0_IP")
+
+	/* Create connection string */
+	connStr := fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=disable", dbIP, dbUser, dbName, dbPass)
+
+	/* Open database connection */
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
 	}
@@ -56,6 +68,7 @@ func NewPostgresStore() (*PostgresStore, error) {
 		return nil, err
 	}
 
+	fmt.Println("Database connection opened")
 	return &PostgresStore{
 		db: db,
 	}, nil
