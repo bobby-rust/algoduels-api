@@ -28,7 +28,7 @@ type Storage interface {
 
 	// TestCase CRU - no need for delete
 	CreateTestCase(*TestCase) (int, error)
-	GetTestCaseByID(int) (*TestCase, error)
+	GetTestCaseByProblemID(int) ([]*TestCase, error)
 	GetTestCases() ([]*TestCase, error)
 	UpdateTestCase(*TestCase) error
 
@@ -128,7 +128,8 @@ func (s *PostgresStore) createTestCaseTable() error {
 			test_case_id SERIAL PRIMARY KEY,
 			problem_id INT REFERENCES Problem(problem_id),
 			input TEXT,
-			output TEXT
+			output TEXT,
+            is_sanity_check BOOLEAN
 		)
 	`
 
@@ -303,13 +304,14 @@ func (s *PostgresStore) CreateTestCase(testcase *TestCase) (int, error) {
 			INSERT INTO TestCase (
 				problem_id, 
 				input,
-				output
+				output,
+                is_sanity_check
 			) 
-			VALUES ($1, $2, $3) RETURNING test_case_id;
+			VALUES ($1, $2, $3, $4) RETURNING test_case_id;
 		`
 
 	var testCaseID int
-	err := s.db.QueryRow(query, testcase.ProblemID, testcase.Input, testcase.Output).Scan(&testCaseID)
+	err := s.db.QueryRow(query, testcase.ProblemID, testcase.Input, testcase.Output, testcase.IsSanityCheck).Scan(&testCaseID)
 	if err != nil {
 		return -1, err
 	}
@@ -318,7 +320,7 @@ func (s *PostgresStore) CreateTestCase(testcase *TestCase) (int, error) {
 }
 
 // -- TestCase Read -- ID here is a PROBLEM id
-func (s *PostgresStore) GetTestCaseByID(id int) (*TestCase, error) {
+func (s *PostgresStore) GetTestCaseByProblemID(id int) ([]*TestCase, error) {
 	query := `SELECT * FROM TestCase WHERE problem_id=$1`
 
 	rows, err := s.db.Query(query, id)
@@ -327,11 +329,17 @@ func (s *PostgresStore) GetTestCaseByID(id int) (*TestCase, error) {
 		return nil, err
 	}
 
+	testCases := []*TestCase{}
+
 	for rows.Next() {
-		return scanIntoTestCase(rows)
+		testCase, err := scanIntoTestCase(rows)
+		if err != nil {
+			return nil, err
+		}
+		testCases = append(testCases, testCase)
 	}
 
-	return nil, fmt.Errorf("Test case %d not found", id)
+	return testCases, nil
 }
 
 func (s *PostgresStore) GetTestCases() ([]*TestCase, error) {
@@ -445,7 +453,7 @@ func scanIntoSubmission(rows *sql.Rows) (*Submission, error) {
 
 func scanIntoTestCase(rows *sql.Rows) (*TestCase, error) {
 	tc := new(TestCase)
-	err := rows.Scan(&tc.ProblemID, &tc.Input, &tc.Output)
+	err := rows.Scan(&tc.TestCaseID, &tc.ProblemID, &tc.Input, &tc.Output, &tc.IsSanityCheck)
 
 	return tc, err
 }

@@ -8,7 +8,7 @@ import (
 
 // GET api/users/{id}
 func (s *APIServer) handleGetAccountByID(w http.ResponseWriter, r *http.Request) error {
-	id, err := getID(r)
+	id, err := getID(r, "user_id")
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 
 // DELETE api/users
 func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
-	id, err := getID(r)
+	id, err := getID(r, "user_id")
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) 
 
 // GET api/problems/{id}
 func (s *APIServer) handleGetProblemByID(w http.ResponseWriter, r *http.Request) error {
-	id, err := getID(r)
+	id, err := getID(r, "problem_id")
 	if err != nil {
 		return err
 	}
@@ -109,14 +109,15 @@ func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) 
 }
 
 // GET api/testcases/{id} *** id here is a PROBLEM id ***
-func (s *APIServer) handleGetTestCaseByID(w http.ResponseWriter, r *http.Request) error {
-	id, err := getID(r)
+func (s *APIServer) handleGetTestCaseByProblemID(w http.ResponseWriter, r *http.Request) error {
+	id, err := getID(r, "problem_id")
 	if err != nil {
 		return err
 	}
 
-	testCase, err := s.store.GetTestCaseByID(id)
+	testCase, err := s.store.GetTestCaseByProblemID(id)
 	if err != nil {
+		fmt.Println("Error here")
 		return err
 	}
 
@@ -132,7 +133,7 @@ func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request)
 	}
 	defer r.Body.Close()
 
-	testCase := NewTestCase(req.ProblemID, req.Input, req.Output)
+	testCase := NewTestCase(req.ProblemID, req.Input, req.Output, req.IsSanityCheck)
 
 	id, err := s.store.CreateTestCase(testCase)
 	if err != nil {
@@ -143,7 +144,7 @@ func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *APIServer) handleGetSubmissionByID(w http.ResponseWriter, r *http.Request) error {
-	id, err := getID(r)
+	id, err := getID(r, "submission_id")
 	if err != nil {
 		return err
 	}

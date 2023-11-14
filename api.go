@@ -41,7 +41,7 @@ func (s *APIServer) Run() {
 
 	/* Test Cases */
 	router.HandleFunc("/testcases", makeHTTPHandlerFunc(s.handleTestCase))
-	router.HandleFunc("/testcases/{id}", makeHTTPHandlerFunc(s.handleTestCaseByID))
+	router.HandleFunc("/testcases/{id}", makeHTTPHandlerFunc(s.handleTestCaseByProblemID))
 
 	log.Println("JSON API server running on port: ", s.listenAddr)
 	http.ListenAndServe(s.listenAddr, handler)
@@ -67,12 +67,12 @@ func makeHTTPHandlerFunc(f apiFunc) http.HandlerFunc {
 	}
 }
 
-func getID(r *http.Request) (int, error) {
-	idStr := mux.Vars(r)["user_id"]
+func getID(r *http.Request, idType string) (int, error) {
+	idStr := mux.Vars(r)["id"]
 	id, err := strconv.Atoi(idStr)
 
 	if err != nil {
-		return id, fmt.Errorf("Invalid user_id %s", idStr)
+		return id, fmt.Errorf("Invalid %s", idType)
 	}
 
 	return id, nil

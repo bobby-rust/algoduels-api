@@ -54,9 +54,9 @@ func (s *APIServer) handleTestCase(w http.ResponseWriter, r *http.Request) error
 	return fmt.Errorf("Method not supported %s", r.Method)
 }
 
-func (s *APIServer) handleTestCaseByID(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleTestCaseByProblemID(w http.ResponseWriter, r *http.Request) error {
 	if method := r.Method; method == "GET" {
-		return s.handleGetTestCaseByID(w, r)
+		return s.handleGetTestCaseByProblemID(w, r)
 	}
 
 	return fmt.Errorf("Method not supported %s", r.Method)

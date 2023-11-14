@@ -21,10 +21,11 @@ type Problem struct {
 }
 
 type TestCase struct {
-	TestCaseID int    `json:"test_case_id"`
-	ProblemID  int    `json:"problem_id"`
-	Input      string `json:"input"`
-	Output     string `json:"output"`
+	TestCaseID    int    `json:"test_case_id"`
+	ProblemID     int    `json:"problem_id"`
+	Input         string `json:"input"`
+	Output        string `json:"output"`
+	IsSanityCheck bool   `json:"is_sanity_check"`
 }
 
 type Submission struct {
@@ -53,9 +54,10 @@ type CreateProblemRequest struct {
 }
 
 type CreateTestCaseRequest struct {
-	ProblemID int `json:"problem_id"`
-	Input     string
-	Output    string
+	ProblemID     int    `json:"problem_id"`
+	Input         string `json:"input"`
+	Output        string `json:"output"`
+	IsSanityCheck bool   `json:"is_sanity_check"`
 }
 
 type CreateSubmissionRequest struct {
@@ -83,11 +85,12 @@ func NewProblem(prompt, starterCode string, difficulty int) *Problem {
 	}
 }
 
-func NewTestCase(problemID int, input, output string) *TestCase {
+func NewTestCase(problemID int, input, output string, isSanityCheck bool) *TestCase {
 	return &TestCase{
-		ProblemID: problemID,
-		Input:     input,
-		Output:    output,
+		ProblemID:     problemID,
+		Input:         input,
+		Output:        output,
+		IsSanityCheck: isSanityCheck,
 	}
 }
 
