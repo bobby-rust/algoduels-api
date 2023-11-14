@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -91,16 +92,18 @@ func (s *APIServer) handleGetProblems(w http.ResponseWriter, r *http.Request) er
 // POST api/problems
 func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) error {
 	req := new(CreateProblemRequest)
-
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		return err
 	}
 	defer r.Body.Close()
-
+	fmt.Printf("in handler: prompt %s, starterCode %s, difficulty %d\n", req.Prompt, req.StarterCode, req.Difficulty)
 	problem := NewProblem(req.Prompt, req.StarterCode, req.Difficulty)
-	if err := s.store.CreateProblem(problem); err != nil {
+	problemID, err := s.store.CreateProblem(problem)
+	if err != nil {
 		return err
 	}
+
+	problem.ProblemID = problemID
 
 	return WriteJSON(w, http.StatusCreated, problem)
 }
@@ -130,10 +133,12 @@ func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request)
 	defer r.Body.Close()
 
 	testCase := NewTestCase(req.ProblemID, req.Input, req.Output)
-	if err := s.store.CreateTestCase(testCase); err != nil {
+
+	id, err := s.store.CreateTestCase(testCase)
+	if err != nil {
 		return err
 	}
-
+	testCase.TestCaseID = id
 	return WriteJSON(w, http.StatusCreated, testCase)
 }
 
@@ -149,24 +154,6 @@ func (s *APIServer) handleGetSubmissionByID(w http.ResponseWriter, r *http.Reque
 	}
 
 	return WriteJSON(w, http.StatusOK, testCase)
-}
-
-func (s *APIServer) handleCreateSubmission(w http.ResponseWriter, r *http.Request) error {
-	// req := new(CreateSubmissionRequest)
-	//
-	// if err := json.NewDecoder(r.Body).Decode(req); err != nil {
-	// 	return err
-	// }
-	// defer r.Body.Close()
-	//
-	// // account := &Account{} // same exact thing as new()
-	// sub := NewSubmission(req.UserID, req.ProblemID, req.Code, req.Language)
-	// if err := s.store.CreateSubmission(sub); err != nil {
-	// 	return err
-	// }
-	//
-	// return WriteJSON(w, http.StatusCreated, sub)
-	return nil
 }
 
 func (s *APIServer) handleGetSubmissions(w http.ResponseWriter, r *http.Request) error {

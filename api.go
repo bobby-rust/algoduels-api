@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"strconv"
@@ -24,17 +25,29 @@ func NewAPIServer(listenAddr string, store Storage) *APIServer {
 
 func (s *APIServer) Run() {
 	router := mux.NewRouter()
-
-	router.HandleFunc("/run", makeHTTPHandlerFunc(s.handleRunCode))
+	handler := cors.Default().Handler(router)
 	router.Use(commonMiddleware)
 
-	router.HandleFunc("/account", makeHTTPHandlerFunc(s.handleAccount))
-	router.HandleFunc("/account/{id}", makeHTTPHandlerFunc(s.handleAccountByID))
+	/* Run code */
+	router.HandleFunc("/run", makeHTTPHandlerFunc(s.handleRunCode))
+
+	/* Accounts */
+	router.HandleFunc("/accounts", makeHTTPHandlerFunc(s.handleAccount))
+	router.HandleFunc("/accounts/{id}", makeHTTPHandlerFunc(s.handleAccountByID))
+
+	/* Problems */
+	router.HandleFunc("/problems", makeHTTPHandlerFunc(s.handleProblem))
+	router.HandleFunc("/problems/{id}", makeHTTPHandlerFunc(s.handleProblemByID))
+
+	/* Test Cases */
+	router.HandleFunc("/testcases", makeHTTPHandlerFunc(s.handleTestCase))
+	router.HandleFunc("/testcases/{id}", makeHTTPHandlerFunc(s.handleTestCaseByID))
+
 	log.Println("JSON API server running on port: ", s.listenAddr)
-	http.ListenAndServe(s.listenAddr, router)
+	http.ListenAndServe(s.listenAddr, handler)
 }
 
-func WriteJSON(w http.ResponseWriter, status int, v any) error {
+func WriteJSON(w http.ResponseWriter, status int, v interface{}) error {
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(v)
 }

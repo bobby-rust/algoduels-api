@@ -45,6 +45,7 @@ func pollJudge0Submission(url string) (*GetOutputResp, error) {
 	ran := 0
 
 	for time.Since(startTime) < timeout {
+		fmt.Println("Giving submission time to process...")
 		time.Sleep(time.Second * 1)
 		fmt.Println("Making GET request...")
 		outputResp, err := http.Get(url)
@@ -75,7 +76,7 @@ func pollJudge0Submission(url string) (*GetOutputResp, error) {
 	return nil, errors.New("Time limit exceeded")
 }
 
-func runCode(w http.ResponseWriter, r *http.Request) error {
+func execute(w http.ResponseWriter, r *http.Request) error {
 	/* Parse incoming request body */
 	incomingReqBody := new(RunCodeRequest)                                  // request struct for running code
 	if err := json.NewDecoder(r.Body).Decode(incomingReqBody); err != nil { // get contents of request body and place into request struct
@@ -99,7 +100,7 @@ func runCode(w http.ResponseWriter, r *http.Request) error {
 	}
 	defer j0CreateSubmissionResp.Body.Close()
 
-	// /* Parse judge0 create submission response */
+	/* Parse judge0 create submission response */
 	var j0CreateSubmissionRespStruct CreateSubmissionResp
 	err = json.NewDecoder(j0CreateSubmissionResp.Body).Decode(&j0CreateSubmissionRespStruct)
 	if err != nil {
@@ -116,27 +117,16 @@ func runCode(w http.ResponseWriter, r *http.Request) error {
 
 	/* Poll judge0 until code has finished executing and output is ready */
 	outputResp, err := pollJudge0Submission(outputUrl)
-
 	if err != nil {
 		return err
 	}
-	// fmt.Println("GET response: ", outputResp)
-	o := outputResp.Stdout
-	fmt.Println(o)
-	// body, err := io.ReadAll(outputResp.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
-	// getOutputResp := new(GetOutputResp)
-	// err = json.Unmarshal(body, &getOutputResp)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// err = json.NewDecoder(outputResp.Body).Decode(&getOutputResp)
-	// fmt.Println("Output: ", getOutputResp)
-	return nil
+	jsonData, err := json.Marshal(outputResp)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsonData))
+	return WriteJSON(w, http.StatusOK, string(jsonData))
 }
 
 func submitCode(w http.ResponseWriter, r *http.Request) error {

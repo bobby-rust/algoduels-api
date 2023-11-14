@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -47,12 +48,12 @@ type CreateAccountRequest struct {
 
 type CreateProblemRequest struct {
 	Prompt      string
-	StarterCode string
+	StarterCode string `json:"starter_code"`
 	Difficulty  int
 }
 
 type CreateTestCaseRequest struct {
-	ProblemID int
+	ProblemID int `json:"problem_id"`
 	Input     string
 	Output    string
 }
@@ -74,6 +75,7 @@ func NewAccount(username, email, password string) *Account {
 }
 
 func NewProblem(prompt, starterCode string, difficulty int) *Problem {
+	fmt.Printf("prompt: %s, starterCode: %s, difficulty: %d\n", prompt, starterCode, difficulty)
 	return &Problem{
 		Prompt:      prompt,
 		StarterCode: starterCode,

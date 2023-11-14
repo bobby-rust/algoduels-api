@@ -21,13 +21,13 @@ type Storage interface {
 	/* --- Front end will not delete any of these below, so i have chosen to omit delete routes --- */
 
 	// Problem CRU - no need for delete
-	CreateProblem(*Problem) error
+	CreateProblem(*Problem) (int, error)
 	GetProblemByID(int) (*Problem, error)
 	GetProblems() ([]*Problem, error)
 	UpdateProblem(*Problem) error
 
 	// TestCase CRU - no need for delete
-	CreateTestCase(*TestCase) error
+	CreateTestCase(*TestCase) (int, error)
 	GetTestCaseByID(int) (*TestCase, error)
 	GetTestCases() ([]*TestCase, error)
 	UpdateTestCase(*TestCase) error
@@ -125,7 +125,7 @@ func (s *PostgresStore) createProblemTable() error {
 func (s *PostgresStore) createTestCaseTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS TestCase (
-			test_id SERIAL PRIMARY KEY,
+			test_case_id SERIAL PRIMARY KEY,
 			problem_id INT REFERENCES Problem(problem_id),
 			input TEXT,
 			output TEXT
@@ -161,7 +161,7 @@ func (s *PostgresStore) CreateAccount(acc *Account) error {
 			INSERT INTO Account (
 				username,
 				email,
-				encryped_password,
+				encrypted_password,
 				created_at
 			) 
 			VALUES ($1, $2, $3, $4)
@@ -177,7 +177,7 @@ func (s *PostgresStore) CreateAccount(acc *Account) error {
 
 // -- Account Read --
 func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
-	query := `SELECT * FROM Account WHERE ID=$1`
+	query := `SELECT * FROM Account WHERE user_id=$1`
 
 	rows, err := s.db.Query(query, id)
 
@@ -222,7 +222,7 @@ func (s *PostgresStore) UpdateAccount(*Account) error {
 // -- Account Delete --
 func (s *PostgresStore) DeleteAccount(id int) error {
 	query := `
-		DELETE FROM Account WHERE ID=$1
+		DELETE FROM Account WHERE user_id=$1
 	`
 
 	_, err := s.db.Query(query, id)
@@ -234,27 +234,28 @@ func (s *PostgresStore) DeleteAccount(id int) error {
 }
 
 // --  Problem Create --
-func (s *PostgresStore) CreateProblem(prob *Problem) error {
+func (s *PostgresStore) CreateProblem(prob *Problem) (int, error) {
 	query := `
 			INSERT INTO Problem (
 				prompt,
 				starter_code,
 				difficulty
 			) 
-			VALUES ($1, $2, $3)
+			VALUES ($1, $2, $3) RETURNING problem_id;
 		`
-
-	_, err := s.db.Query(query, prob.Prompt, prob.StarterCode, prob.Difficulty)
+	var problemID int
+	err := s.db.QueryRow(query, prob.Prompt, prob.StarterCode, prob.Difficulty).Scan(&problemID)
+	fmt.Printf("ProblemID: %d", problemID)
 	if err != nil {
-		return err
+		return -1, err // -1 signifies an error occurred
 	}
 
-	return nil
+	return problemID, nil
 }
 
 // -- Problem Read --
 func (s *PostgresStore) GetProblemByID(id int) (*Problem, error) {
-	query := `SELECT * FROM Problem WHERE ID=$1`
+	query := `SELECT * FROM Problem WHERE problem_id=$1`
 
 	rows, err := s.db.Query(query, id)
 
@@ -296,28 +297,29 @@ func (s *PostgresStore) UpdateProblem(*Problem) error {
 	return nil
 }
 
-// --  Problem Create --
-func (s *PostgresStore) CreateTestCase(test *TestCase) error {
+// --  TestCase Create --
+func (s *PostgresStore) CreateTestCase(testcase *TestCase) (int, error) {
 	query := `
 			INSERT INTO TestCase (
 				problem_id, 
 				input,
 				output
 			) 
-			VALUES ($1, $2, $3)
+			VALUES ($1, $2, $3) RETURNING test_case_id;
 		`
 
-	_, err := s.db.Query(query, test.ProblemID, test.Input, test.Output)
+	var testCaseID int
+	err := s.db.QueryRow(query, testcase.ProblemID, testcase.Input, testcase.Output).Scan(&testCaseID)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
-	return nil
+	return testCaseID, nil
 }
 
-// -- Problem Read --
+// -- TestCase Read -- ID here is a PROBLEM id
 func (s *PostgresStore) GetTestCaseByID(id int) (*TestCase, error) {
-	query := `SELECT * FROM TestCase WHERE ID=$1`
+	query := `SELECT * FROM TestCase WHERE problem_id=$1`
 
 	rows, err := s.db.Query(query, id)
 
@@ -385,7 +387,7 @@ func (s *PostgresStore) CreateSubmission(sub *Submission) error {
 
 // -- Problem Read --
 func (s *PostgresStore) GetSubmissionByID(id int) (*Submission, error) {
-	query := `SELECT * FROM Submission WHERE ID=$1`
+	query := `SELECT * FROM Submission WHERE submission_id=$1`
 
 	rows, err := s.db.Query(query, id)
 
