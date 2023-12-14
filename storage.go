@@ -55,6 +55,7 @@ func NewPostgresStore() (*PostgresStore, error) {
 	dbPass := os.Getenv("DB_PASS")
 	dbIP := os.Getenv("JUDGE0_IP")
 
+	fmt.Println("attemptng to connect to the server...")
 	/* Create connection string */
 	connStr := fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=disable", dbIP, dbUser, dbName, dbPass)
 
@@ -439,7 +440,7 @@ func (s *PostgresStore) UpdateSubmission(*Submission) error {
 
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 	account := new(Account)
-	err := rows.Scan(&account.UserID, &account.Username, &account.Email, &account.CreatedAt)
+	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.EncryptedPassword, &account.CreatedAt)
 
 	return account, err
 }

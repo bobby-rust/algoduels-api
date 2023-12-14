@@ -14,10 +14,10 @@ func main() {
 	fmt.Println("Booting up...")
 	store, err := NewPostgresStore()
 
-	fmt.Println("Postgres Store Created...")
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Postgres Store Created...")
 
 	if err := store.Init(); err != nil {
 		log.Fatal(err)

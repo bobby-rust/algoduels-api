@@ -7,6 +7,8 @@ import (
 
 type Account struct {
 	UserID            int       `json:"user_id"`
+	FirstName         string    `json:"first_name"`
+	LastName          string    `json:"last_name"`
 	Username          string    `json:"username"`
 	Email             string    `json:"email"`
 	EncryptedPassword string    `json:"encryptedPassword"`
@@ -42,9 +44,11 @@ type Submission struct {
 }
 
 type CreateAccountRequest struct {
-	Username string
-	Email    string
-	Password string
+	Username  string
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string
+	Password  string
 }
 
 type CreateProblemRequest struct {
@@ -67,9 +71,11 @@ type CreateSubmissionRequest struct {
 	Language  int
 }
 
-func NewAccount(username, email, password string) *Account {
+func NewAccount(username, firstName, lastName, email, password string) *Account {
 	return &Account{
 		Username:          username,
+		FirstName:         firstName,
+		LastName:          lastName,
 		Email:             email,
 		EncryptedPassword: password,
 		CreatedAt:         time.Now().UTC(),

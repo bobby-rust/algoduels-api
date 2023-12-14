@@ -41,8 +41,8 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	}
 	defer r.Body.Close()
 
-	// account := &Account{} // same exact thing as new()
-	account := NewAccount(req.Username, req.Email, req.Password)
+	// account := &Account{} // same thing as new()
+	account := NewAccount(req.Username, req.FirstName, req.LastName, req.Email, req.Password)
 	if err := s.store.CreateAccount(account); err != nil {
 		return err
 	}
