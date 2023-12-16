@@ -161,15 +161,17 @@ func (s *PostgresStore) createSubmissionTable() error {
 func (s *PostgresStore) CreateAccount(acc *Account) error {
 	query := `
 			INSERT INTO Account (
+                first_name,
+                last_name,
 				username,
 				email,
 				encrypted_password,
 				created_at
 			) 
-			VALUES ($1, $2, $3, $4)
+			VALUES ($1, $2, $3, $4, $5, $6)
 		`
 
-	_, err := s.db.Query(query, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
+	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
 	if err != nil {
 		return err
 	}
