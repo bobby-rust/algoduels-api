@@ -42,7 +42,7 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	defer r.Body.Close()
 
 	// account := &Account{} // same thing as new()
-	account := NewAccount(req.Username, req.FirstName, req.LastName, req.Email, req.Password)
+	account := NewAccountRequest(req.Username, req.FirstName, req.LastName, req.Email, req.Password)
 	if err := s.store.CreateAccount(account); err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) 
 	}
 	defer r.Body.Close()
 	fmt.Printf("in handler: prompt %s, starterCode %s, difficulty %d\n", req.Prompt, req.StarterCode, req.Difficulty)
-	problem := NewProblem(req.Prompt, req.StarterCode, req.Difficulty)
+	problem := NewProblem(req.Prompt, req.StarterCode, uint8(req.Difficulty))
 	problemID, err := s.store.CreateProblem(problem)
 	if err != nil {
 		return err
