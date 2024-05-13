@@ -5,19 +5,35 @@ import (
 	"time"
 )
 
+type DifficultyRegistry struct {
+	Easy   uint8
+	Medium uint8
+	Hard   uint8
+}
+
+func newDifficultyRegistry() *DifficultyRegistry {
+	return &DifficultyRegistry{
+		Easy:   1,
+		Medium: 2,
+		Hard:   3,
+	}
+}
+
 type Account struct {
 	UserID            int       `json:"user_id"`
+	FirstName         string    `json:"first_name"`
+	LastName          string    `json:"last_name"`
 	Username          string    `json:"username"`
-	Email             string    `json:"email"`
-	EncryptedPassword string    `json:"encryptedPassword"`
-	CreatedAt         time.Time `json:"createdAt"`
+	Email             string    `json:"email"` // For some reason, need this json struct tag is needed to keep the formatting from giving me OCD...
+	EncryptedPassword string    `json:"password"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 type Problem struct {
 	ProblemID   int    `json:"problem_id"`
 	Prompt      string `json:"prompt"`
 	StarterCode string `json:"starter_code"`
-	Difficulty  int    `json:"difficulty"`
+	Difficulty  uint8  `json:"difficulty"`
 }
 
 type TestCase struct {
@@ -42,11 +58,21 @@ type Submission struct {
 }
 
 type CreateAccountRequest struct {
-	Username string
-	Email    string
-	Password string
+	Username  string
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string
+	Password  string
 }
 
+type CreateAccountResponse struct {
+	Username          string
+	FirstName         string `json:"first_name"`
+	LastName          string `json:"last_name"`
+	Email             string
+	EncryptedPassword string
+	CreatedAt         time.Time
+}
 type CreateProblemRequest struct {
 	Prompt      string
 	StarterCode string `json:"starter_code"`
@@ -67,16 +93,27 @@ type CreateSubmissionRequest struct {
 	Language  int
 }
 
-func NewAccount(username, email, password string) *Account {
-	return &Account{
+func NewAccountResponse(username, firstName, lastName, email, password string) *CreateAccountResponse {
+	return &CreateAccountResponse{
 		Username:          username,
+		FirstName:         firstName,
+		LastName:          lastName,
 		Email:             email,
 		EncryptedPassword: password,
 		CreatedAt:         time.Now().UTC(),
 	}
 }
 
-func NewProblem(prompt, starterCode string, difficulty int) *Problem {
+func NewAccountRequest(username, firstName, lastName, email, password string) *CreateAccountRequest {
+	return &CreateAccountRequest{
+		Username:  username,
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+	}
+}
+
+func NewProblem(prompt, starterCode string, difficulty uint8) *Problem {
 	fmt.Printf("prompt: %s, starterCode: %s, difficulty: %d\n", prompt, starterCode, difficulty)
 	return &Problem{
 		Prompt:      prompt,

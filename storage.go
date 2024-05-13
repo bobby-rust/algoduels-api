@@ -12,7 +12,7 @@ import (
 
 type Storage interface {
 	// Account CRUD
-	CreateAccount(*Account) error
+	CreateAccount(*CreateAccountRequest) error
 	GetAccountByID(int) (*Account, error)
 	GetAccounts() ([]*Account, error)
 	UpdateAccount(*Account) error
@@ -53,10 +53,11 @@ func NewPostgresStore() (*PostgresStore, error) {
 	dbName := os.Getenv("DB_NAME")
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
-	dbIP := os.Getenv("JUDGE0_IP")
+	dbHost := os.Getenv("DB_HOST")
 
+	fmt.Println("attemptng to connect to the server...")
 	/* Create connection string */
-	connStr := fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=disable", dbIP, dbUser, dbName, dbPass)
+	connStr := fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=disable", dbHost, dbUser, dbName, dbPass)
 
 	/* Open database connection */
 	db, err := sql.Open("postgres", connStr)
@@ -157,18 +158,20 @@ func (s *PostgresStore) createSubmissionTable() error {
 }
 
 // -- Account Create --
-func (s *PostgresStore) CreateAccount(acc *Account) error {
+func (s *PostgresStore) CreateAccount(acc *CreateAccountResponse) error {
 	query := `
 			INSERT INTO Account (
+                first_name,
+                last_name,
 				username,
 				email,
 				encrypted_password,
 				created_at
 			) 
-			VALUES ($1, $2, $3, $4)
+			VALUES ($1, $2, $3, $4, $5, $6)
 		`
 
-	_, err := s.db.Query(query, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
+	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -439,7 +442,7 @@ func (s *PostgresStore) UpdateSubmission(*Submission) error {
 
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 	account := new(Account)
-	err := rows.Scan(&account.UserID, &account.Username, &account.Email, &account.CreatedAt)
+	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.EncryptedPassword, &account.CreatedAt)
 
 	return account, err
 }

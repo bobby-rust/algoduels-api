@@ -47,6 +47,7 @@ func (s *APIServer) Run() {
 	http.ListenAndServe(s.listenAddr, handler)
 }
 
+// Pass WriteJSON a pointer to a struct as param `v`, not sure what other types would work, if any ?
 func WriteJSON(w http.ResponseWriter, status int, v interface{}) error {
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(v)

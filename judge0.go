@@ -47,7 +47,7 @@ func pollJudge0Submission(url string) (*GetOutputResp, error) {
 	for time.Since(startTime) < timeout {
 		fmt.Println("Giving submission time to process...")
 		time.Sleep(time.Second * 1)
-		fmt.Println("Making GET request...")
+		fmt.Println("Sending GET request...")
 		outputResp, err := http.Get(url)
 		ran++
 		if err != nil {
@@ -121,12 +121,7 @@ func execute(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	jsonData, err := json.Marshal(outputResp)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(jsonData))
-	return WriteJSON(w, http.StatusOK, string(jsonData))
+	return WriteJSON(w, http.StatusOK, outputResp)
 }
 
 func submitCode(w http.ResponseWriter, r *http.Request) error {
