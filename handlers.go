@@ -109,7 +109,7 @@ func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) 
 }
 
 // GET api/testcases/{id} *** id here is a PROBLEM id ***
-func (s *APIServer) handleGetTestCaseByProblemID(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleGetTestCasesByProblemID(w http.ResponseWriter, r *http.Request) error {
 	id, err := getID(r, "problem_id")
 	if err != nil {
 		return err
@@ -140,6 +140,21 @@ func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request)
 	}
 	testCase.TestCaseID = id
 	return WriteJSON(w, http.StatusCreated, testCase)
+}
+
+func (s *APIServer) handleCreateSubmission(w http.ResponseWriter, r *http.Request) error {
+	req := new(Submission)
+
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		return err
+	}
+
+	sub, err := s.store.CreateSubmission(req)
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusCreated, sub)
 }
 
 func (s *APIServer) handleGetSubmissionByID(w http.ResponseWriter, r *http.Request) error {

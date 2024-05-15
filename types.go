@@ -48,13 +48,11 @@ type Submission struct {
 	SubmissionID int       `json:"submission_id"`
 	UserID       int       `json:"user_id"`
 	ProblemID    int       `json:"problem_id"`
-	Token        string    `json:"token"`
 	SubmittedAt  time.Time `json:"submitted_at"`
-	Code         string    `json:"code"`
+	SourceCode   string    `json:"source_code"`
 	Language     int       `json:"language"`
-	IsAccepted   bool      `json:"is_accepted"`
-	ExecTimeMS   int       `json:"exec_time_ms"`
-	MemUsageKB   int       `json:"mem_usage_kb"`
+	RuntimeMs    int       `json:"runtime_ms"`
+	MemUsageKb   int       `json:"mem_usage_kb"`
 }
 
 type CreateAccountRequest struct {
@@ -87,10 +85,12 @@ type CreateTestCaseRequest struct {
 }
 
 type CreateSubmissionRequest struct {
-	UserID    int
-	ProblemID int
-	Code      string
-	Language  int
+	UserID     int    `json:"user_id"`
+	ProblemID  int    `json:"problem_id"`
+	SourceCode string `json:"source_code"`
+	Language   int    `json:"language"`
+	RuntimeMs  int32  `json:"runtime_ms"`
+	MemUsageKb int32  `json:"mem_usage_kb"`
 }
 
 func NewAccountResponse(username, firstName, lastName, email, password string) *CreateAccountResponse {
@@ -136,11 +136,9 @@ func NewSubmission(userID, problemID int, token, code string, language int, isAc
 	return &Submission{
 		UserID:     userID,
 		ProblemID:  problemID,
-		Token:      token,
-		Code:       code,
+		SourceCode: code,
 		Language:   language,
-		IsAccepted: isAccepted,
-		ExecTimeMS: execTimeMs,
-		MemUsageKB: memUsageKb,
+		RuntimeMs:  execTimeMs,
+		MemUsageKb: memUsageKb,
 	}
 }

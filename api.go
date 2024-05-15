@@ -44,6 +44,10 @@ func (s *APIServer) Run() {
 	router.HandleFunc(apiRoute+"/testcases", makeHTTPHandlerFunc(s.handleTestCase))
 	router.HandleFunc(apiRoute+"/testcases/{id}", makeHTTPHandlerFunc(s.handleTestCaseByProblemID))
 
+	/* Submissions */
+	router.HandleFunc(apiRoute+"/submissions", makeHTTPHandlerFunc(s.handleCreateSubmission))
+	router.HandleFunc(apiRoute+"/submissions/{id}", makeHTTPHandlerFunc(s.handleGetSubmissionByID))
+
 	log.Println("- API server running on port", s.listenAddr[1:])
 	http.ListenAndServe(s.listenAddr, handler)
 }

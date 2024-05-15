@@ -33,8 +33,8 @@ type Storage interface {
 	GetTestCases() ([]*TestCase, error)
 	UpdateTestCase(*TestCase) error
 
-	// Submission CRU - no need for delete
-	CreateSubmission(*Submission) error
+	// Submission CRU - no need for delete (yet)
+	CreateSubmission(*Submission) (*Submission, error)
 	GetSubmissionByID(int) (*Submission, error)
 	GetSubmissions() ([]*Submission, error)
 	UpdateSubmission(*Submission) error
@@ -146,10 +146,9 @@ func (s *PostgresStore) createSubmissionTable() error {
 			user_id INT REFERENCES Account(user_id),
 			problem_id INT REFERENCES Problem(problem_id),
 			submitted_at TIMESTAMP DEFAULT NOW(),
-			code TEXT,
+			source_code TEXT,
 			language INT,
-			is_accepted BOOLEAN,
-			exec_time_ms INT,
+			runtime_ms INT,
 			mem_usage_kb INT
 		)
 	`
@@ -390,8 +389,8 @@ func (s *PostgresStore) UpdateTestCase(*TestCase) error {
 	return nil
 }
 
-// --  Problem Create --
-func (s *PostgresStore) CreateSubmission(sub *Submission) error {
+// --  Submission Create --
+func (s *PostgresStore) CreateSubmission(sub *Submission) (*Submission, error) {
 	query := `
 			INSERT INTO Submission (
 				user_id,
@@ -399,22 +398,28 @@ func (s *PostgresStore) CreateSubmission(sub *Submission) error {
 				submitted_at,
 				code,
 				language,
-				is_accepted,
 				exec_time_ms,
 				mem_usage_kb
 			) 
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
 		`
 
-	_, err := s.db.Query(query, sub.UserID, sub.ProblemID, sub.SubmittedAt, sub.Code, sub.Language, sub.IsAccepted, sub.ExecTimeMS, sub.MemUsageKB)
+	rows, err := s.db.Query(query, sub.UserID, sub.ProblemID, time.Now().UTC(), sub.SourceCode, sub.Language)
+	defer rows.Close()
+
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	sub, err = scanIntoSubmission(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return sub, nil
 }
 
-// -- Problem Read --
+// -- Submission Read --
 func (s *PostgresStore) GetSubmissionByID(id int) (*Submission, error) {
 	query := `SELECT * FROM Submission WHERE submission_id=$1`
 
@@ -491,7 +496,7 @@ func scanIntoAccountResponse(rows *sql.Rows) (*CreateAccountResponse, error) {
 
 func scanIntoSubmission(rows *sql.Rows) (*Submission, error) {
 	sub := new(Submission)
-	err := rows.Scan(&sub.UserID, &sub.ProblemID, &sub.SubmittedAt, &sub.Code, &sub.Language, &sub.IsAccepted, &sub.ExecTimeMS, &sub.MemUsageKB)
+	err := rows.Scan(&sub.UserID, &sub.ProblemID, &sub.SubmittedAt, &sub.SourceCode, &sub.Language)
 
 	return sub, err
 }

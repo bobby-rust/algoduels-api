@@ -5,9 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	// "log"
 	"net/http"
 	"time"
+)
+
+const (
+	url       = "http://localhost:2358/submissions" // judge0 url
+	urlParams = "?&fields=stdout,time,memory,stderr,compile_output,message,status"
 )
 
 var languageIDs = map[string]int{
@@ -15,17 +19,30 @@ var languageIDs = map[string]int{
 	"javascript": 63,
 }
 
-type RunCodeRequest struct {
+type ExecReq struct {
+	ProblemID  int    `json:"problem_id"`
 	LanguageID int    `json:"language_id"`
 	SourceCode string `json:"source_code"`
+	IsTest     bool   `json:"is_test"`
 }
 
-type GetOutputResp struct {
+type Result struct {
+	Passed bool         `json:"passed"`
+	Result []TestResult `json:"result"`
+}
+
+type TestResult struct {
+	Input    string `json:"input"`
+	Output   string `json:"output"`
+	Expected string `json:"expected"`
+	Passed   bool   `json:"passed"`
+}
+
+type ExecResult struct {
 	Stdout        string  `json:"stdout"`
 	Time          string  `json:"time"`
 	Memory        int     `json:"memory"`
 	Stderr        *string `json:"stderr"`
-	Token         string  `json:"token"`
 	CompileOutput string  `json:"compile_output"`
 	Message       string  `json:"message"`
 	Status        struct {
@@ -34,11 +51,8 @@ type GetOutputResp struct {
 	} `json:"status"`
 }
 
-type CreateSubmissionResp struct {
-	Token string `json:"token"`
-}
-
-func pollJudge0Submission(url string) (*GetOutputResp, error) {
+/* Polls judge0 to retreive the results of the submission associated with `token`*/
+func pollJudge0Submission(token string) (*ExecResult, error) {
 	timeout := 10 * time.Second
 	startTime := time.Now()
 	time.Sleep(time.Second)
@@ -70,23 +84,16 @@ func pollJudge0Submission(url string) (*GetOutputResp, error) {
 			return outputRespStruct, nil
 		} else {
 			fmt.Println("Status.Description: ", outputRespStruct.Status.Description)
+			return nil, errors.New("Error description: " + outputRespStruct.Status.Description)
 		}
 	}
 
 	return nil, errors.New("Time limit exceeded")
 }
 
-func execute(w http.ResponseWriter, r *http.Request) error {
-	/* Parse incoming request body */
-	incomingReqBody := new(RunCodeRequest)                                  // request struct for running code
-	if err := json.NewDecoder(r.Body).Decode(incomingReqBody); err != nil { // get contents of request body and place into request struct
-		return err
-	}
-	defer r.Body.Close() // close body
-	fmt.Println("Incoming request body: ", incomingReqBody)
-	url := "http://localhost:2358/submissions" // judge0 url
+/* Executes some code using Judge0 */
+func execute(req *ExecReq) (*ExecResult, error) {
 
-	/* Create request body for judge0 */
 	j0CreateSubmissionReqBody := incomingReqBody                               // for ease of understanding, we copy the incoming req into a variable with a better name
 	mJ0CreateSubmissionReqBody, err := json.Marshal(j0CreateSubmissionReqBody) // marshalled judge0 req body, we convert to raw byte slice for sending
 	if err != nil {
@@ -94,7 +101,7 @@ func execute(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	/* Create judge0 code submission */
-	j0CreateSubmissionResp, err := http.Post(url, "application/json", bytes.NewReader(mJ0CreateSubmissionReqBody)) // http.Post takes io.Reader for the request body
+	j0CreateSubmissionResp, err := http.Post(url+urlParams, "application/json", bytes.NewReader(mJ0CreateSubmissionReqBody)) // http.Post takes io.Reader for the request body
 	if err != nil {
 		return err
 	}

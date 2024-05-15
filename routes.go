@@ -57,7 +57,7 @@ func (s *APIServer) handleTestCase(w http.ResponseWriter, r *http.Request) error
 
 func (s *APIServer) handleTestCaseByProblemID(w http.ResponseWriter, r *http.Request) error {
 	if method := r.Method; method == "GET" {
-		return s.handleGetTestCaseByProblemID(w, r)
+		return s.handleGetTestCasesByProblemID(w, r)
 	}
 
 	return fmt.Errorf("Method not supported %s", r.Method)
@@ -68,7 +68,7 @@ func (s *APIServer) handleSubmission(w http.ResponseWriter, r *http.Request) err
 	case "GET":
 		return s.handleGetSubmissions(w, r)
 	case "POST":
-		return nil
+		return s.handleCreateSubmission(w, r)
 	}
 
 	return fmt.Errorf("Method not supported %s", r.Method)

@@ -1,13 +1,18 @@
 run code          [x]
 
 ----- Account -------
-create account    [ ]
-get account       [ ]
-update account    [ ]
-delete account    [ ]
+create account    [x]
+get account       [ ] // this is needed to view profiles, but not necessary for mvp
+update account    [ ] // doesn't matter yet, lower prio
+delete account    [ ] // same
 
 
 --- Submission ------
+/* 
+ * Only accepted submissions will be stored in DB,
+ * one per problem per user. To be used later for
+ * problem solutions
+ */
 create submission [ ]
 get submission    [ ]
 
@@ -20,3 +25,4 @@ create problem    [ ]
 
 ------ Testcase ------
 create testcase   [ ]
+get testcases     [ ] // by problem id
