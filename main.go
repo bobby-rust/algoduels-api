@@ -24,8 +24,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	test(store)
-
 	fmt.Println("Store initialized...")
 	port := os.Getenv("PORT")
 	server := NewAPIServer(":"+port, store)

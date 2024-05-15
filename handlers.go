@@ -37,16 +37,11 @@ func (s *APIServer) handleCreateAccount(w http.ResponseWriter, r *http.Request) 
 	var acc CreateAccountRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&acc); err != nil {
-		fmt.Println("error decoding json")
 		return err
 	}
 	defer r.Body.Close()
 
-	fmt.Println("firstname: "+acc.FirstName, "last name: "+acc.LastName, "user name: "+acc.Username, "email: "+acc.Email, "pw:"+acc.Password)
-
-	// account := &Account{} // same thing as new()
 	accountReq := NewAccountRequest(acc.Username, acc.FirstName, acc.LastName, acc.Email, acc.Password)
-	fmt.Println("LastName: ", accountReq.LastName)
 	accountRes, err := s.store.CreateAccount(accountReq)
 	if err != nil {
 		return err
@@ -122,7 +117,6 @@ func (s *APIServer) handleGetTestCaseByProblemID(w http.ResponseWriter, r *http.
 
 	testCase, err := s.store.GetTestCaseByProblemID(id)
 	if err != nil {
-		fmt.Println("Error here")
 		return err
 	}
 
