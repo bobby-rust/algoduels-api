@@ -6,6 +6,7 @@ import (
 )
 
 func (s *APIServer) handleAccount(w http.ResponseWriter, r *http.Request) error {
+
 	switch method := r.Method; method {
 	case "GET":
 		return s.handleGetAccount(w, r)

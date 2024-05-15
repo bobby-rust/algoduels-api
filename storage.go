@@ -4,15 +4,68 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"log"
 	"os"
-
-	_ "github.com/lib/pq"
+	"strconv"
+	"time"
 )
+
+type AccountTest struct {
+	UserID    int       `json:"user_id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Test struct {
+	Testfield string
+}
+
+func test(s *PostgresStore) {
+	// query := `CREATE TABLE IF NOT EXISTS test (testfield VARCHAR(50))`
+	// res, err := s.db.Exec(query)
+	// fmt.Println("res from exec: ", res)
+
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// query = `INSERT INTO test VALUES ($1) RETURNING *`
+	// rows, err := s.db.Query(query, "testing123")
+	// defer rows.Close()
+
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// var test Test
+	// for rows.Next() {
+	// 	rows.Scan(&test.Testfield)
+	// }
+
+	// fmt.Println("testfield: ", test.Testfield)
+
+	query := `INSERT INTO account (first_name, last_name, username, email, encrypted_password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`
+	rows, err := s.db.Query(query, "abc", "123", "123", "123", "123", time.Now().UTC())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	var acc AccountTest
+	for rows.Next() {
+		rows.Scan(&acc.UserID, &acc.FirstName, &acc.LastName, &acc.Username, &acc.Email, &acc.Password, &acc.CreatedAt)
+	}
+
+	fmt.Println(acc.UserID, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.Password, acc.CreatedAt)
+}
 
 type Storage interface {
 	// Account CRUD
-	CreateAccount(*CreateAccountRequest) error
+	CreateAccount(*CreateAccountRequest) (*CreateAccountResponse, error)
 	GetAccountByID(int) (*Account, error)
 	GetAccounts() ([]*Account, error)
 	UpdateAccount(*Account) error
@@ -55,7 +108,7 @@ func NewPostgresStore() (*PostgresStore, error) {
 	dbPass := os.Getenv("DB_PASS")
 	dbHost := os.Getenv("DB_HOST")
 
-	fmt.Println("attemptng to connect to the server...")
+	fmt.Println("Attemptng to connect to the server...")
 	/* Create connection string */
 	connStr := fmt.Sprintf("host=%s user=%s dbname=%s password=%s sslmode=disable", dbHost, dbUser, dbName, dbPass)
 
@@ -158,7 +211,22 @@ func (s *PostgresStore) createSubmissionTable() error {
 }
 
 // -- Account Create --
-func (s *PostgresStore) CreateAccount(acc *CreateAccountResponse) error {
+func (s *PostgresStore) CreateAccount(acc *CreateAccountRequest) (*CreateAccountResponse, error) {
+
+	// query := `INSERT INTO account (first_name, last_name, username, email, encrypted_password, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`
+	// 	rows, err := s.db.Query(query, "abc", "123", "123", "123", "123", time.Now().UTC())
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	defer rows.Close()
+	// 	var acc AccountTest
+	// 	for rows.Next() {
+	// 		rows.Scan(&acc.UserID, &acc.FirstName, &acc.LastName, &acc.Username, &acc.Email, &acc.Password, &acc.CreatedAt)
+	// 	}
+
+	fmt.Println("ACC IN CREATE: ")
+	fmt.Println(acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.Password)
+
 	query := `
 			INSERT INTO Account (
                 first_name,
@@ -169,14 +237,32 @@ func (s *PostgresStore) CreateAccount(acc *CreateAccountResponse) error {
 				created_at
 			) 
 			VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *
 		`
 
-	_, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.EncryptedPassword, acc.CreatedAt)
+	createdAt := time.Now().UTC()
+
+	rows, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Username, acc.Email, acc.Password, createdAt)
 	if err != nil {
-		return err
+		fmt.Println("error here?")
+		return nil, err
+	}
+	fmt.Println("Account inserted into database.")
+
+	res, err := scanIntoAccountResponse(rows)
+
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("res:", res)
+	fmt.Println(res)
+
+	return res, nil
 }
 
 // -- Account Read --
@@ -442,9 +528,44 @@ func (s *PostgresStore) UpdateSubmission(*Submission) error {
 
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 	account := new(Account)
-	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.EncryptedPassword, &account.CreatedAt)
+	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.Password, &account.CreatedAt)
 
 	return account, err
+}
+
+func scanIntoAccountResponse(rows *sql.Rows) (*CreateAccountResponse, error) {
+	// defer rows.Close()
+	// 	var acc AccountTest
+	// 	for rows.Next() {
+	// 		rows.Scan(&acc.UserID, &acc.FirstName, &acc.LastName, &acc.Username, &acc.Email, &acc.Password, &acc.CreatedAt)
+	// 	}
+	defer rows.Close()
+	acc := new(Account)
+
+	for rows.Next() {
+		err := rows.Scan(&acc.UserID, &acc.FirstName, &acc.LastName, &acc.Username, &acc.Email, &acc.Password, &acc.CreatedAt)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fmt.Printf("first name: " + acc.FirstName + "\n")
+	fmt.Printf("password: " + acc.Password + "\n")
+	fmt.Printf("userId: ", strconv.Itoa(acc.UserID)+"\n")
+	fmt.Printf("email: ", acc.Email+"\n")
+	res := &CreateAccountResponse{
+		FirstName: acc.FirstName,
+		LastName:  acc.LastName,
+		Username:  acc.Username,
+		Email:     acc.Email,
+		Password:  acc.Password, // TODO: ENCRYPT THIS
+		CreatedAt: acc.CreatedAt,
+	}
+
+	fmt.Println(res)
+
+	return res, nil
 }
 
 func scanIntoSubmission(rows *sql.Rows) (*Submission, error) {

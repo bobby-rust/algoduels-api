@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
-	// "github.com/Valgard/godotenv"
+	"os"
 )
 
 func main() {
-	// dotenv := godotenv.New()
-	// if err := dotenv.Load(".env"); err != nil {
-	// 	panic(err)
-	// }
+	if err := godotenv.Load(".env"); err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Booting up...")
 	store, err := NewPostgresStore()
 
@@ -23,10 +24,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	test(store)
+
 	fmt.Println("Store initialized...")
-	// port := os.Getenv("PORT")
-	port := "3000"
+	port := os.Getenv("PORT")
 	server := NewAPIServer(":"+port, store)
-	fmt.Printf("Server running on port %s", port)
 	server.Run()
+
 }

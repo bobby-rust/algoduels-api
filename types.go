@@ -20,13 +20,13 @@ func newDifficultyRegistry() *DifficultyRegistry {
 }
 
 type Account struct {
-	UserID            int       `json:"user_id"`
-	FirstName         string    `json:"first_name"`
-	LastName          string    `json:"last_name"`
-	Username          string    `json:"username"`
-	Email             string    `json:"email"` // For some reason, need this json struct tag is needed to keep the formatting from giving me OCD...
-	EncryptedPassword string    `json:"password"`
-	CreatedAt         time.Time `json:"created_at"`
+	UserID    int       `json:"user_id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`    // For some reason, need this json struct tag is needed to keep the formatting from giving me OCD...
+	Password  string    `json:"password"` // TODO: ENCRYPT THIS!
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Problem struct {
@@ -58,20 +58,20 @@ type Submission struct {
 }
 
 type CreateAccountRequest struct {
-	Username  string
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Email     string
-	Password  string
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 type CreateAccountResponse struct {
-	Username          string
-	FirstName         string `json:"first_name"`
-	LastName          string `json:"last_name"`
-	Email             string
-	EncryptedPassword string
-	CreatedAt         time.Time
+	Username  string    `json:"username"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
 }
 type CreateProblemRequest struct {
 	Prompt      string
@@ -95,12 +95,12 @@ type CreateSubmissionRequest struct {
 
 func NewAccountResponse(username, firstName, lastName, email, password string) *CreateAccountResponse {
 	return &CreateAccountResponse{
-		Username:          username,
-		FirstName:         firstName,
-		LastName:          lastName,
-		Email:             email,
-		EncryptedPassword: password,
-		CreatedAt:         time.Now().UTC(),
+		Username:  username,
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+		Password:  password,
+		CreatedAt: time.Now().UTC(),
 	}
 }
 
@@ -110,6 +110,7 @@ func NewAccountRequest(username, firstName, lastName, email, password string) *C
 		FirstName: firstName,
 		LastName:  lastName,
 		Email:     email,
+		Password:  password,
 	}
 }
 

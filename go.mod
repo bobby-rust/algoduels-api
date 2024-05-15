@@ -1,12 +1,11 @@
-module example.com/algoduels-api
+module github.com/bobby-rust/algoduels-api
 
 go 1.21.1
 
 require github.com/gorilla/mux v1.8.1
 
-require github.com/lib/pq v1.10.9
-
 require (
-	github.com/joho/godotenv v1.5.1 // indirect
-	github.com/rs/cors v1.10.1 // indirect
+	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.10.9
+	github.com/rs/cors v1.10.1
 )

@@ -1,0 +1,22 @@
+run code          [x]
+
+----- Account -------
+create account    [ ]
+get account       [ ]
+update account    [ ]
+delete account    [ ]
+
+
+--- Submission ------
+create submission [ ]
+get submission    [ ]
+
+=============================
+
+NOT NECESSARY FOR INITIAL APP
+CAN MANUALLY DO THESE + THEYRE STATIC
+----- Problem -------
+create problem    [ ]
+
+------ Testcase ------
+create testcase   [ ]

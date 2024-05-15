@@ -1,0 +1,13 @@
+The easiest way to connect to the postgres db running in a docker container 
+directly from the host machine is to
+map port 5432 of the host machine to port 5432 of the container,
+
+i.e., add:
+    ports:
+      - "5432:5432"
+
+under `db` in docker-compose.yaml,
+where the first port corresponds to that port on the host machine. 
+This causes any traffic sent to the first port on the host machine 
+to be forwarded to the second port in the docker container environment
+

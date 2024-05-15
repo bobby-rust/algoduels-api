@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+// "fmt"
 )
 
-func runUserCodeWithInput() {
-	return nil
+func runUserCodeWithInput() bool {
+	return true
 }

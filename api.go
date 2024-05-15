@@ -27,23 +27,24 @@ func (s *APIServer) Run() {
 	router := mux.NewRouter()
 	handler := cors.Default().Handler(router)
 	router.Use(commonMiddleware)
+	apiRoute := "/api"
 
 	/* Run code */
-	router.HandleFunc("/run", makeHTTPHandlerFunc(s.handleRunCode))
+	router.HandleFunc(apiRoute+"/run", makeHTTPHandlerFunc(s.handleRunCode))
 
 	/* Accounts */
-	router.HandleFunc("/accounts", makeHTTPHandlerFunc(s.handleAccount))
-	router.HandleFunc("/accounts/{id}", makeHTTPHandlerFunc(s.handleAccountByID))
+	router.HandleFunc(apiRoute+"/accounts", makeHTTPHandlerFunc(s.handleAccount))
+	router.HandleFunc(apiRoute+"/accounts/{id}", makeHTTPHandlerFunc(s.handleAccountByID))
 
 	/* Problems */
-	router.HandleFunc("/problems", makeHTTPHandlerFunc(s.handleProblem))
-	router.HandleFunc("/problems/{id}", makeHTTPHandlerFunc(s.handleProblemByID))
+	router.HandleFunc(apiRoute+"/problems", makeHTTPHandlerFunc(s.handleProblem))
+	router.HandleFunc(apiRoute+"/problems/{id}", makeHTTPHandlerFunc(s.handleProblemByID))
 
 	/* Test Cases */
-	router.HandleFunc("/testcases", makeHTTPHandlerFunc(s.handleTestCase))
-	router.HandleFunc("/testcases/{id}", makeHTTPHandlerFunc(s.handleTestCaseByProblemID))
+	router.HandleFunc(apiRoute+"/testcases", makeHTTPHandlerFunc(s.handleTestCase))
+	router.HandleFunc(apiRoute+"/testcases/{id}", makeHTTPHandlerFunc(s.handleTestCaseByProblemID))
 
-	log.Println("JSON API server running on port: ", s.listenAddr)
+	log.Println("- API server running on port", s.listenAddr[1:])
 	http.ListenAndServe(s.listenAddr, handler)
 }
 
@@ -62,7 +63,6 @@ type ApiError struct {
 func makeHTTPHandlerFunc(f apiFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := f(w, r); err != nil {
-			// handle error
 			WriteJSON(w, http.StatusBadRequest, ApiError{Error: err.Error()})
 		}
 	}
