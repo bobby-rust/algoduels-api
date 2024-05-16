@@ -20,15 +20,19 @@ var languageIDs = map[string]int{
 }
 
 type ExecReq struct {
-	ProblemID  int    `json:"problem_id"`
-	LanguageID int    `json:"language_id"`
-	SourceCode string `json:"source_code"`
-	IsTest     bool   `json:"is_test"`
+	ProblemID     int    `json:"problem_id"`
+	LanguageID    int    `json:"language_id"`
+	SourceCode    string `json:"source_code"`
+	IsSanityCheck bool   `json:"is_sanity_check"`
 }
 
 type Result struct {
 	Passed bool         `json:"passed"`
 	Result []TestResult `json:"result"`
+}
+
+type CrSubRes struct {
+	Token string `json:"token"`
 }
 
 type TestResult struct {
@@ -51,7 +55,67 @@ type ExecResult struct {
 	} `json:"status"`
 }
 
-/* Polls judge0 to retreive the results of the submission associated with `token`*/
+/* Executes some code and returns result of execution */
+func execute(req *ExecReq) (*ExecResult, error) {
+	jsonReq, err := json.Marshal(req) // marshalled (JSONified) judge0 req body, we convert to raw byte slice for sending
+	if err != nil {
+		return nil, err
+	}
+
+	/* Create judge0 code submission */
+	res, err := http.Post(url+urlParams, "application/json", bytes.NewReader(jsonReq)) // http.Post takes io.Reader for the request body
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	/* Parse judge0 create submission response */
+	var crSubRes CrSubRes
+	err = json.NewDecoder(res.Body).Decode(&crSubRes)
+	if err != nil {
+		return nil, err
+	}
+
+	/* Extract token */
+	token := crSubRes.Token
+
+	/* Poll judge0 until code has finished executing and output is ready */
+	execResult, err := pollJudge0Submission(token)
+	if err != nil {
+		return nil, err
+	}
+
+	return execResult, nil
+}
+
+/**
+ * Gets all test cases for a problem id, calls test(), returns Result
+ */
+func submit(s *PostgresStore, req ExecReq) (*Result, error) {
+	result := new(Result)
+
+	return result, nil
+}
+
+/**
+ * Gets sanity check test cases for a problem id, calls test(), returns Result
+ */
+func run(s *PostgresStore, req ExecReq) (*Result, error) {
+	result := new(Result)
+
+	return result, nil
+}
+
+/**
+ *
+ */
+func test(testCases []TestCase) *[]Result {
+	results := new([]Result)
+
+	return results
+}
+
+/* Polls judge0 to retreive the results of the submission associated with `token` */
 func pollJudge0Submission(token string) (*ExecResult, error) {
 	timeout := 10 * time.Second
 	startTime := time.Now()
@@ -70,7 +134,7 @@ func pollJudge0Submission(token string) (*ExecResult, error) {
 		}
 
 		/* Parse get submission response */
-		outputRespStruct := new(GetOutputResp)
+		outputRespStruct := new(ExecResult)
 		outputErr := json.NewDecoder(outputResp.Body).Decode(&outputRespStruct)
 		if outputErr != nil {
 			fmt.Println("Error decoding outputResp body", outputErr)
@@ -89,48 +153,4 @@ func pollJudge0Submission(token string) (*ExecResult, error) {
 	}
 
 	return nil, errors.New("Time limit exceeded")
-}
-
-/* Executes some code using Judge0 */
-func execute(req *ExecReq) (*ExecResult, error) {
-
-	j0CreateSubmissionReqBody := incomingReqBody                               // for ease of understanding, we copy the incoming req into a variable with a better name
-	mJ0CreateSubmissionReqBody, err := json.Marshal(j0CreateSubmissionReqBody) // marshalled judge0 req body, we convert to raw byte slice for sending
-	if err != nil {
-		return err
-	}
-
-	/* Create judge0 code submission */
-	j0CreateSubmissionResp, err := http.Post(url+urlParams, "application/json", bytes.NewReader(mJ0CreateSubmissionReqBody)) // http.Post takes io.Reader for the request body
-	if err != nil {
-		return err
-	}
-	defer j0CreateSubmissionResp.Body.Close()
-
-	/* Parse judge0 create submission response */
-	var j0CreateSubmissionRespStruct CreateSubmissionResp
-	err = json.NewDecoder(j0CreateSubmissionResp.Body).Decode(&j0CreateSubmissionRespStruct)
-	if err != nil {
-		return err
-	}
-
-	/* Extract token */
-	token := j0CreateSubmissionRespStruct.Token
-	fmt.Println(token)
-
-	/* url to retrieve code output */
-	outputUrl := url + "/" + token
-	fmt.Println(outputUrl)
-
-	/* Poll judge0 until code has finished executing and output is ready */
-	outputResp, err := pollJudge0Submission(outputUrl)
-	if err != nil {
-		return err
-	}
-
-	return WriteJSON(w, http.StatusOK, outputResp)
-}
-
-func submitCode(w http.ResponseWriter, r *http.Request) error {
-	return nil
 }

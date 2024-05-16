@@ -463,6 +463,17 @@ func (s *PostgresStore) UpdateSubmission(*Submission) error {
 	return nil
 }
 
+/*
+ * This is dumb, this has little to do with the postgres store, why am i putting this here...
+ */
+func (s *PostgresStore) Run(req ExecReq) (*Result, error) {
+	return run(s, req)
+}
+
+func (s *PostgresStore) Submit(req ExecReq) (*Result, error) {
+	return submit(s, req)
+}
+
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 	account := new(Account)
 	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.Password, &account.CreatedAt)

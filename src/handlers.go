@@ -148,7 +148,6 @@ func (s *APIServer) handleCreateSubmission(w http.ResponseWriter, r *http.Reques
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		return err
 	}
-
 	sub, err := s.store.CreateSubmission(req)
 	if err != nil {
 		return err
@@ -175,7 +174,22 @@ func (s *APIServer) handleGetSubmissions(w http.ResponseWriter, r *http.Request)
 	return nil
 }
 
+// POST api/submit
 func (s *APIServer) handleSubmitCode(w http.ResponseWriter, r *http.Request) error {
+	req := new(ExecReq)
+}
+
+// POST api/run
+func (s *APIServer) handleRunCode(w http.ResponseWriter, r *http.Request) error {
+	req := new(ExecReq)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return err
+	}
+
+	result, err := execute(req)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

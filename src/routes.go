@@ -82,9 +82,9 @@ func (s *APIServer) handleSubmissionByID(w http.ResponseWriter, r *http.Request)
 	return fmt.Errorf("Method not supported %s", r.Method)
 }
 
-func (s *APIServer) handleRunCode(w http.ResponseWriter, r *http.Request) error {
+func (s *APIServer) handleRun(w http.ResponseWriter, r *http.Request) error {
 	if method := r.Method; method == "POST" {
-		return execute(w, r)
+		return s.handleRunCode(w, r)
 	}
 
 	return fmt.Errorf("Method not supported %s", r.Method)

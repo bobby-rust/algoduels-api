@@ -30,7 +30,7 @@ func (s *APIServer) Run() {
 	apiRoute := "/api"
 
 	/* Run code */
-	router.HandleFunc(apiRoute+"/run", makeHTTPHandlerFunc(s.handleRunCode))
+	router.HandleFunc(apiRoute+"/run", makeHTTPHandlerFunc(s.handleRun))
 
 	/* Accounts */
 	router.HandleFunc(apiRoute+"/accounts", makeHTTPHandlerFunc(s.handleAccount))
