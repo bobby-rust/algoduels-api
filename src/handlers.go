@@ -176,11 +176,14 @@ func (s *APIServer) handleGetSubmissions(w http.ResponseWriter, r *http.Request)
 
 // POST api/submit
 func (s *APIServer) handleSubmitCode(w http.ResponseWriter, r *http.Request) error {
-	req := new(ExecReq)
+	// req := new(ExecReq)
+
+	return nil
 }
 
 // POST api/run
 func (s *APIServer) handleRunCode(w http.ResponseWriter, r *http.Request) error {
+	fmt.Println("handling run code request...")
 	req := new(ExecReq)
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return err
@@ -191,5 +194,5 @@ func (s *APIServer) handleRunCode(w http.ResponseWriter, r *http.Request) error 
 		return err
 	}
 
-	return nil
+	return WriteJSON(w, http.StatusOK, result)
 }

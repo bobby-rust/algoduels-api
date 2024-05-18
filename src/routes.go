@@ -84,6 +84,7 @@ func (s *APIServer) handleSubmissionByID(w http.ResponseWriter, r *http.Request)
 
 func (s *APIServer) handleRun(w http.ResponseWriter, r *http.Request) error {
 	if method := r.Method; method == "POST" {
+		fmt.Println("Received post request...")
 		return s.handleRunCode(w, r)
 	}
 

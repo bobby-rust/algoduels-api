@@ -57,14 +57,19 @@ type ExecResult struct {
 
 /* Executes some code and returns result of execution */
 func execute(req *ExecReq) (*ExecResult, error) {
+	fmt.Println("executing...")
 	jsonReq, err := json.Marshal(req) // marshalled (JSONified) judge0 req body, we convert to raw byte slice for sending
 	if err != nil {
+		fmt.Println("error marshalling json")
 		return nil, err
 	}
+
+	fmt.Println("successfully marshalled json: ", jsonReq)
 
 	/* Create judge0 code submission */
 	res, err := http.Post(url+urlParams, "application/json", bytes.NewReader(jsonReq)) // http.Post takes io.Reader for the request body
 	if err != nil {
+		fmt.Println("Error sending code to judge0")
 		return nil, err
 	}
 	defer res.Body.Close()
@@ -78,6 +83,7 @@ func execute(req *ExecReq) (*ExecResult, error) {
 
 	/* Extract token */
 	token := crSubRes.Token
+	fmt.Println(token)
 
 	/* Poll judge0 until code has finished executing and output is ready */
 	execResult, err := pollJudge0Submission(token)
@@ -126,7 +132,7 @@ func pollJudge0Submission(token string) (*ExecResult, error) {
 		fmt.Println("Giving submission time to process...")
 		time.Sleep(time.Second * 1)
 		fmt.Println("Sending GET request...")
-		outputResp, err := http.Get(url)
+		outputResp, err := http.Get(url + "/" + token)
 		ran++
 		if err != nil {
 			fmt.Println("Error during GET request, retrying... ")

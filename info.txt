@@ -16,3 +16,18 @@ next will be duels without matchmaking (challenge a friend with link)
 should add twos / duo queue, 2 vs 2 with realtime duo code editing
 
 "Problems are only problems because they ask the wrong questions." - maybe add quotes somewhere on the app for fun
+
+Some question ideas:
+    1. Implement `some data structure` with the methods `some methods`
+        Ex.
+            Implement a linked-list of nodes holding integers with 
+            methods for adding at a position,
+            removing at a position, and searching for an element.
+        Ex.2
+            Implement a hash-table with methods for retrieving, 
+            adding, removing, and checking for the existence of elements.
+            The hashing algorithm can me a naive solution.
+
+    2. Some AOC problems ?
+
+

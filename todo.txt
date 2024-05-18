@@ -1,4 +1,30 @@
 run code          [x]
+populate db with problems and test cases [ ]
+
+----- implement algorithm to test solution given source code ------  
+----- need to standardize a test data structure -------------------
+----- maybe json some test cases and write a script to load into db
+----- tough to plan, just start implementing agile style for now --
+----- I'm unsure what problems i'll run into, can't solve a problem
+----- I can't define. ---------------------------------------------
+Steps:
+    fetch test cases
+    results = []
+    for each test case
+        output = execute(testcase.input)
+        compare textcase.expectedOutput to output
+        push test case results to results
+        if test case failed:
+            return results, tests failed
+
+    return results, tests succeedded
+
+------ Matchmaking ----
+set up web sockets [ ]
+implement queue [ ]
+implement matchmaking algorithm [ ]
+
+
 
 ----- Account -------
 create account    [x]
@@ -11,7 +37,7 @@ delete account    [ ] // same
 /* 
  * Only accepted submissions will be stored in DB,
  * one per problem per user. To be used later for
- * problem solutions
+ * problem solutions and to show users their previous solutions
  */
 create submission [ ]
 get submission    [ ]

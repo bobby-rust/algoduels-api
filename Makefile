@@ -1,8 +1,9 @@
-build:
-	@go build -o bin/main
 
-run: build	
+build:
+	@cd src && go build -o ../bin/main
+
+run: build
 	@./bin/main
 
 test:
-	@go test -v ./...
+	@cd src && go test -v ./...
