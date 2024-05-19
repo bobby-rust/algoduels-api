@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// TODO: Return full judge0 response from API when an error is thrown
+
 const (
 	url       = "http://localhost:2358/submissions" // judge0 url
 	urlParams = "?&fields=stdout,time,memory,stderr,compile_output,message,status"
@@ -123,7 +125,7 @@ func test(testCases []TestCase) *[]Result {
 
 /* Polls judge0 to retreive the results of the submission associated with `token` */
 func pollJudge0Submission(token string) (*ExecResult, error) {
-	timeout := 10 * time.Second
+	timeout := 20 * time.Second
 	startTime := time.Now()
 	time.Sleep(time.Second)
 	ran := 0
@@ -153,6 +155,11 @@ func pollJudge0Submission(token string) (*ExecResult, error) {
 			fmt.Println("Response: ", outputRespStruct)
 			return outputRespStruct, nil
 		} else {
+			if outputRespStruct.Status.ID == 2 {
+				continue
+			}
+
+			fmt.Println("status.id: ", outputRespStruct.Status.ID)
 			fmt.Println("Status.Description: ", outputRespStruct.Status.Description)
 			return nil, errors.New("Error description: " + outputRespStruct.Status.Description)
 		}

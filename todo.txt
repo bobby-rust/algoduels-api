@@ -1,12 +1,34 @@
+User stories in (somewhat) order of priority:
+    1.) As a user in a match, I want to be able to run my code as a sanity check
+        against 3 test cases and get feedback on how my solution is looking.
+            - This involves:
+                * implement the test algorithm
+                * creating enough problems for the app to be interesting (start with maybe 10?)
+                * creating sanity check test cases for each problem
+                * creating rigorous test cases for each problem
+
+    2.) As a user, I want to be able to submit my code against the full test suite
+        and get feedback on whether my solution passed or failed.
+
+    3.) As a user, when my submission fails, I want to be able to see which test my code
+        fails on, along with my code's output and the expected output.
+
+    4.) As a user, I want to be able to enter the matchmaking queue.
+
+    5.) As a user, I want to be able to get into a match with another user. 
+
+    6.) As a user, I want to be able to create an account.
+
+    7.) As a user, I want to be able to log in.
+
+    8.) As a user, when I run my code, I want to be able to see errors that are produced by my faulty code.
+
 run code          [x]
 populate db with problems and test cases [ ]
 
 ----- implement algorithm to test solution given source code ------  
 ----- need to standardize a test data structure -------------------
------ maybe json some test cases and write a script to load into db
------ tough to plan, just start implementing agile style for now --
------ I'm unsure what problems i'll run into, can't solve a problem
------ I can't define. ---------------------------------------------
+----- maybe json some test cases and write a script to load into db ?
 Steps:
     fetch test cases
     results = []

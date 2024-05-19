@@ -93,6 +93,10 @@ func (s *PostgresStore) Init() error {
 	return nil
 }
 
+func (s *PostgresStore) populateTestCases() error {
+	return nil
+}
+
 func (s *PostgresStore) createAccountTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS Account (
@@ -129,6 +133,7 @@ func (s *PostgresStore) createTestCaseTable() error {
 		CREATE TABLE IF NOT EXISTS TestCase (
 			test_case_id SERIAL PRIMARY KEY,
 			problem_id INT REFERENCES Problem(problem_id),
+            problem_name text,
 			input TEXT,
 			output TEXT,
             is_sanity_check BOOLEAN
