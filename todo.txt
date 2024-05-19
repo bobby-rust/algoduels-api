@@ -2,6 +2,7 @@ User stories in (somewhat) order of priority:
     1.) As a user in a match, I want to be able to run my code as a sanity check
         against 3 test cases and get feedback on how my solution is looking.
             - This involves:
+                * need to create a json parser for arbitrary inputs and outputs
                 * implement the test algorithm
                 * creating enough problems for the app to be interesting (start with maybe 10?)
                 * creating sanity check test cases for each problem

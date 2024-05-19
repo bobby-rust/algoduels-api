@@ -1,0 +1,38 @@
+{
+  "name": "Two Sum",
+  "prompt": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\\nYou can return the answer in any order.",
+  "starter_code": "/**\\n * @param {number[]} nums\\n * @param {number} target\\n * @return {number[]}\\n */\\nvar twoSum = function (nums, target) {\\n\\n};",
+  "difficulty": 1,
+  "tests": [
+    {
+      "sanity": true,
+      "io": {
+        "input": {
+          "nums": [2, 7, 9, 11],
+          "target": 9
+        },
+        "output": [0, 1]
+      }
+    },
+    {
+      "sanity": true,
+      "io": {
+        "input": {
+          "nums": [3, 3],
+          "target": 6
+        },
+        "output": [0, 1]
+      }
+    },
+    {
+      "sanity": true,
+      "io": {
+        "input": {
+          "nums": [7, 11, 2, 5],
+          "target": 7
+        },
+        "output": [2, 3]
+      }
+    }
+  ]
+}
