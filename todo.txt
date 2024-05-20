@@ -24,6 +24,10 @@ User stories in (somewhat) order of priority:
 
     8.) As a user, when I run my code, I want to be able to see errors that are produced by my faulty code.
 
+    9.) As a user, I want to be able to earn ELO and rank up by playing games.
+
+    10.) As a user, I want to be able to earn xp and level up by playing games. 
+
 run code          [x]
 populate db with problems and test cases [ ]
 

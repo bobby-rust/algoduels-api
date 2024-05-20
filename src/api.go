@@ -44,6 +44,7 @@ func (s *APIServer) Run() {
 	/* Test Cases */
 	router.HandleFunc(apiRoute+"/testcases", makeHTTPHandlerFunc(s.handleTestCase))
 	router.HandleFunc(apiRoute+"/testcases/{id}", makeHTTPHandlerFunc(s.handleTestCaseByProblemID))
+	router.HandleFunc(apiRoute+"/testcases/sanity/{id}", makeHTTPHandlerFunc(s.handleTestCaseSanity))
 
 	/* Submissions */
 	router.HandleFunc(apiRoute+"/submissions", makeHTTPHandlerFunc(s.handleCreateSubmission))

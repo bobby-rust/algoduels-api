@@ -71,6 +71,14 @@ func (s *APIServer) handleTestCaseByProblemID(w http.ResponseWriter, r *http.Req
 	return fmt.Errorf("Method not supported %s", r.Method)
 }
 
+func (s *APIServer) handleTestCaseSanity(w http.ResponseWriter, r *http.Request) error {
+	if method := r.Method; method == "GET" {
+		return s.handleGetTestCaseSanityChecks(w, r)
+	}
+
+	return fmt.Errorf("Method not supported %s", r.Method)
+}
+
 func (s *APIServer) handleSubmission(w http.ResponseWriter, r *http.Request) error {
 	switch method := r.Method; method {
 	case "GET":

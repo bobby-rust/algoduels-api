@@ -31,6 +31,7 @@ type Storage interface {
 	// TestCase CRU - no need for delete
 	CreateTestCase(*TestCase) (int, error)
 	GetTestCaseByProblemID(int) ([]*TestCase, error)
+	GetTestCaseSanityChecks(int) ([]*TestCase, error)
 	GetTestCases() ([]*TestCase, error)
 	UpdateTestCase(*TestCase) error
 
@@ -359,6 +360,29 @@ func (s *PostgresStore) CreateTestCase(testcase *TestCase) (int, error) {
 // -- TestCase Read -- ID here is a PROBLEM id
 func (s *PostgresStore) GetTestCaseByProblemID(id int) ([]*TestCase, error) {
 	query := `SELECT * FROM TestCase WHERE problem_id=$1`
+
+	rows, err := s.db.Query(query, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	testCases := []*TestCase{}
+
+	for rows.Next() {
+		testCase, err := scanIntoTestCase(rows)
+		if err != nil {
+			return nil, err
+		}
+		testCases = append(testCases, testCase)
+	}
+
+	return testCases, nil
+}
+
+// -- TestCase Read -- ID here is a PROBLEM id
+func (s *PostgresStore) GetTestCaseSanityChecks(id int) ([]*TestCase, error) {
+	query := `SELECT * FROM TestCase WHERE problem_id=$1 AND is_sanity_check=TRUE`
 
 	rows, err := s.db.Query(query, id)
 

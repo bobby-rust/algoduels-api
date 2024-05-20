@@ -134,6 +134,20 @@ func (s *APIServer) handleGetTestCasesByProblemID(w http.ResponseWriter, r *http
 	return WriteJSON(w, http.StatusOK, testCase)
 }
 
+func (s *APIServer) handleGetTestCaseSanityChecks(w http.ResponseWriter, r *http.Request) error {
+	id, err := getID(r, "problem_id")
+	if err != nil {
+		return err
+	}
+
+	testCase, err := s.store.GetTestCaseSanityChecks(id)
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, testCase)
+}
+
 // POST api/testcases
 func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request) error {
 	req := new(CreateTestCaseRequest)
