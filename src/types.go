@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -24,13 +23,14 @@ type Account struct {
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
 	Username  string    `json:"username"`
-	Email     string    `json:"email"`    // For some reason, need this json struct tag is needed to keep the formatting from giving me OCD...
-	Password  string    `json:"password"` // TODO: ENCRYPT THIS!
+	Email     string    `json:"email"` // For some reason, need this json struct tag is needed to keep the formatting from giving me OCD...
+	Password  string    `json:"password"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 type Problem struct {
 	ProblemID   int    `json:"problem_id"`
+	ProblemName string `json:"problem_name"`
 	Prompt      string `json:"prompt"`
 	StarterCode string `json:"starter_code"`
 	Difficulty  uint8  `json:"difficulty"`
@@ -39,8 +39,7 @@ type Problem struct {
 type TestCase struct {
 	TestCaseID    int    `json:"test_case_id"`
 	ProblemID     int    `json:"problem_id"`
-	Input         string `json:"input"`
-	Output        string `json:"output"`
+	IO            string `json:"io"`
 	IsSanityCheck bool   `json:"is_sanity_check"`
 }
 
@@ -72,6 +71,7 @@ type CreateAccountResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 type CreateProblemRequest struct {
+	ProblemName string `json:"problem_name"`
 	Prompt      string
 	StarterCode string `json:"starter_code"`
 	Difficulty  int
@@ -79,8 +79,7 @@ type CreateProblemRequest struct {
 
 type CreateTestCaseRequest struct {
 	ProblemID     int    `json:"problem_id"`
-	Input         string `json:"input"`
-	Output        string `json:"output"`
+	IO            string `json:"io"`
 	IsSanityCheck bool   `json:"is_sanity_check"`
 }
 
@@ -114,20 +113,19 @@ func NewAccountRequest(username, firstName, lastName, email, password string) *C
 	}
 }
 
-func NewProblem(prompt, starterCode string, difficulty uint8) *Problem {
-	fmt.Printf("prompt: %s, starterCode: %s, difficulty: %d\n", prompt, starterCode, difficulty)
+func NewProblem(problemName, prompt, starterCode string, difficulty uint8) *Problem {
 	return &Problem{
+		ProblemName: problemName,
 		Prompt:      prompt,
 		StarterCode: starterCode,
 		Difficulty:  difficulty,
 	}
 }
 
-func NewTestCase(problemID int, input, output string, isSanityCheck bool) *TestCase {
+func NewTestCase(problemID int, io string, isSanityCheck bool) *TestCase {
 	return &TestCase{
 		ProblemID:     problemID,
-		Input:         input,
-		Output:        output,
+		IO:            io,
 		IsSanityCheck: isSanityCheck,
 	}
 }

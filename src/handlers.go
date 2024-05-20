@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // GET api/users/{id}
@@ -89,6 +91,16 @@ func (s *APIServer) handleGetProblems(w http.ResponseWriter, r *http.Request) er
 	return WriteJSON(w, http.StatusOK, problems)
 }
 
+func (s *APIServer) handleGetProblemByName(w http.ResponseWriter, r *http.Request) error {
+	name := mux.Vars(r)["name"]
+	problem, err := s.store.GetProblemByName(name)
+	if err != nil {
+		return err
+	}
+
+	return WriteJSON(w, http.StatusOK, problem)
+}
+
 // POST api/problems
 func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) error {
 	req := new(CreateProblemRequest)
@@ -96,8 +108,7 @@ func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 	defer r.Body.Close()
-	fmt.Printf("in handler: prompt %s, starterCode %s, difficulty %d\n", req.Prompt, req.StarterCode, req.Difficulty)
-	problem := NewProblem(req.Prompt, req.StarterCode, uint8(req.Difficulty))
+	problem := NewProblem(req.ProblemName, req.Prompt, req.StarterCode, uint8(req.Difficulty))
 	problemID, err := s.store.CreateProblem(problem)
 	if err != nil {
 		return err
@@ -132,7 +143,7 @@ func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request)
 	}
 	defer r.Body.Close()
 
-	testCase := NewTestCase(req.ProblemID, req.Input, req.Output, req.IsSanityCheck)
+	testCase := NewTestCase(req.ProblemID, req.IO, req.IsSanityCheck)
 
 	id, err := s.store.CreateTestCase(testCase)
 	if err != nil {

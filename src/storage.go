@@ -24,6 +24,7 @@ type Storage interface {
 	// Problem CRU - no need for delete
 	CreateProblem(*Problem) (int, error)
 	GetProblemByID(int) (*Problem, error)
+	GetProblemByName(string) (*Problem, error)
 	GetProblems() ([]*Problem, error)
 	UpdateProblem(*Problem) error
 
@@ -90,10 +91,6 @@ func (s *PostgresStore) Init() error {
 		}
 	}
 
-	return nil
-}
-
-func (s *PostgresStore) populateTestCases() error {
 	return nil
 }
 
@@ -293,7 +290,23 @@ func (s *PostgresStore) GetProblemByID(id int) (*Problem, error) {
 		return scanIntoProblem(rows)
 	}
 
-	return nil, fmt.Errorf("Account %d not found", id)
+	return nil, fmt.Errorf("problem %d not found", id)
+}
+
+func (s *PostgresStore) GetProblemByName(name string) (*Problem, error) {
+	query := `SELECT * FROM problem WHERE problem_name=$1`
+
+	rows, err := s.db.Query(query, name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		return scanIntoProblem(rows)
+	}
+
+	return nil, fmt.Errorf("Problem %s not found", name)
 }
 
 func (s *PostgresStore) GetProblems() ([]*Problem, error) {
@@ -328,15 +341,14 @@ func (s *PostgresStore) CreateTestCase(testcase *TestCase) (int, error) {
 	query := `
 			INSERT INTO TestCase (
 				problem_id, 
-				input,
-				output,
+				io,
                 is_sanity_check
 			) 
 			VALUES ($1, $2, $3, $4) RETURNING test_case_id;
 		`
 
 	var testCaseID int
-	err := s.db.QueryRow(query, testcase.ProblemID, testcase.Input, testcase.Output, testcase.IsSanityCheck).Scan(&testCaseID)
+	err := s.db.QueryRow(query, testcase.ProblemID, testcase.IO, testcase.IsSanityCheck).Scan(&testCaseID)
 	if err != nil {
 		return -1, err
 	}
@@ -519,14 +531,14 @@ func scanIntoSubmission(rows *sql.Rows) (*Submission, error) {
 
 func scanIntoTestCase(rows *sql.Rows) (*TestCase, error) {
 	tc := new(TestCase)
-	err := rows.Scan(&tc.TestCaseID, &tc.ProblemID, &tc.Input, &tc.Output, &tc.IsSanityCheck)
+	err := rows.Scan(&tc.TestCaseID, &tc.ProblemID, &tc.IsSanityCheck, &tc.IO)
 
 	return tc, err
 }
 
 func scanIntoProblem(rows *sql.Rows) (*Problem, error) {
 	p := new(Problem)
-	err := rows.Scan(&p.Prompt, &p.StarterCode, &p.Difficulty)
+	err := rows.Scan(&p.ProblemID, &p.Prompt, &p.StarterCode, &p.Difficulty, &p.ProblemName)
 
 	return p, err
 }
