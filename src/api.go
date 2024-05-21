@@ -31,6 +31,7 @@ func (s *APIServer) Run() {
 
 	/* Run code */
 	router.HandleFunc(apiRoute+"/run", makeHTTPHandlerFunc(s.handleRun))
+	router.HandleFunc(apiRoute+"/run/batch", makeHTTPHandlerFunc(s.handleRunBatch))
 
 	/* Accounts */
 	router.HandleFunc(apiRoute+"/accounts", makeHTTPHandlerFunc(s.handleAccount))

@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -30,7 +31,7 @@ type Storage interface {
 
 	// TestCase CRU - no need for delete
 	CreateTestCase(*TestCase) (int, error)
-	GetTestCaseByProblemID(int) ([]*TestCase, error)
+	GetTestCasesByProblemID(int) ([]*TestCase, error)
 	GetTestCaseSanityChecks(int) ([]*TestCase, error)
 	GetTestCases() ([]*TestCase, error)
 	UpdateTestCase(*TestCase) error
@@ -358,7 +359,7 @@ func (s *PostgresStore) CreateTestCase(testcase *TestCase) (int, error) {
 }
 
 // -- TestCase Read -- ID here is a PROBLEM id
-func (s *PostgresStore) GetTestCaseByProblemID(id int) ([]*TestCase, error) {
+func (s *PostgresStore) GetTestCasesByProblemID(id int) ([]*TestCase, error) {
 	query := `SELECT * FROM TestCase WHERE problem_id=$1`
 
 	rows, err := s.db.Query(query, id)
@@ -397,6 +398,7 @@ func (s *PostgresStore) GetTestCaseSanityChecks(id int) ([]*TestCase, error) {
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("test case in storage", testCase)
 		testCases = append(testCases, testCase)
 	}
 
@@ -504,17 +506,6 @@ func (s *PostgresStore) UpdateSubmission(*Submission) error {
 	return nil
 }
 
-/*
- * This is dumb, this has little to do with the postgres store, why am i putting this here...
- */
-func (s *PostgresStore) Run(req ExecReq) (*Result, error) {
-	return run(s, req)
-}
-
-func (s *PostgresStore) Submit(req ExecReq) (*Result, error) {
-	return submit(s, req)
-}
-
 func scanIntoAccount(rows *sql.Rows) (*Account, error) {
 	account := new(Account)
 	err := rows.Scan(&account.UserID, &account.FirstName, &account.LastName, &account.Username, &account.Email, &account.Password, &account.CreatedAt)
@@ -555,9 +546,21 @@ func scanIntoSubmission(rows *sql.Rows) (*Submission, error) {
 
 func scanIntoTestCase(rows *sql.Rows) (*TestCase, error) {
 	tc := new(TestCase)
-	err := rows.Scan(&tc.TestCaseID, &tc.ProblemID, &tc.IsSanityCheck, &tc.IO)
+	var ioData []byte
 
-	return tc, err
+	err := rows.Scan(&tc.TestCaseID, &tc.ProblemID, &tc.IsSanityCheck, &ioData)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(tc)
+
+	err = json.Unmarshal(ioData, &tc.IO)
+	if err != nil {
+		return nil, err
+	}
+
+	return tc, nil
 }
 
 func scanIntoProblem(rows *sql.Rows) (*Problem, error) {

@@ -126,11 +126,7 @@ func run(s *APIServer, req *ExecReq) (*ExecResult, error) {
 		}
 
 		for i := 0; i < len(tests); i++ {
-			var inputValues string
-			for _, val := range tests[i].IO.Input {
-				inputValues += fmt.Sprintf("%v,", val)
-			}
-			inputValues = inputValues[:len(inputValues)-1] // remove last comma
+			// req.SourceCode += tests[i].IO.Input + "\n"
 			fmt.Println(tests[i])
 		}
 	}

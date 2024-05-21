@@ -8,6 +8,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type ExecBatchReq struct {
+	Submissions []ExecReq `json:"submissions"`
+}
+
 // GET api/users/{id}
 func (s *APIServer) handleGetAccountByID(w http.ResponseWriter, r *http.Request) error {
 	id, err := getID(r, "user_id")
@@ -126,7 +130,7 @@ func (s *APIServer) handleGetTestCasesByProblemID(w http.ResponseWriter, r *http
 		return err
 	}
 
-	testCase, err := s.store.GetTestCaseByProblemID(id)
+	testCase, err := s.store.GetTestCasesByProblemID(id)
 	if err != nil {
 		return err
 	}
@@ -157,7 +161,7 @@ func (s *APIServer) handleCreateTestCase(w http.ResponseWriter, r *http.Request)
 	}
 	defer r.Body.Close()
 
-	testCase := NewTestCase(req.ProblemID, req.IO, req.IsSanityCheck)
+	testCase := NewTestCase(req.ProblemID, req.IO.Input, req.IO.Output, req.IsSanityCheck)
 
 	id, err := s.store.CreateTestCase(testCase)
 	if err != nil {
@@ -214,10 +218,33 @@ func (s *APIServer) handleRunCode(w http.ResponseWriter, r *http.Request) error 
 		return err
 	}
 
-	result, err := execute(req)
+	result, err := run(s, req)
 	if err != nil {
 		return err
 	}
 
 	return WriteJSON(w, http.StatusOK, result)
+}
+
+// POST api/run/batch
+func (s *APIServer) handleRunBatchCode(w http.ResponseWriter, r *http.Request) error {
+	req := new(ExecBatchReq)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		fmt.Println("ErroR!!")
+		return err
+	}
+
+	fmt.Println(req)
+
+	var res []*ExecResult
+
+	for i := 0; i < len(req.Submissions); i++ {
+		result, err := run(s, &req.Submissions[i])
+		if err != nil {
+			return err
+		}
+		res = append(res, result)
+	}
+
+	return WriteJSON(w, http.StatusOK, res)
 }

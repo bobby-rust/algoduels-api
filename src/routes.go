@@ -106,3 +106,11 @@ func (s *APIServer) handleRun(w http.ResponseWriter, r *http.Request) error {
 
 	return fmt.Errorf("Method not supported %s", r.Method)
 }
+
+func (s *APIServer) handleRunBatch(w http.ResponseWriter, r *http.Request) error {
+	if method := r.Method; method == "POST" {
+		return s.handleRunBatchCode(w, r)
+	}
+
+	return fmt.Errorf("Method not supported %s", r.Method)
+}

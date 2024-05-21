@@ -30,6 +30,7 @@ User stories in (somewhat) order of priority:
 
 run code          [x]
 populate db with problems and test cases [ ]
+Setup a batch submit api route [ ]
 
 ----- implement algorithm to test solution given source code ------  
 ----- need to standardize a test data structure -------------------

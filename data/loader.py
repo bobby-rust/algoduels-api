@@ -23,12 +23,13 @@ try:
         prompt = data["prompt"]
         starter_code = data["starter_code"]
         difficulty = data["difficulty"]
+        function_name = data["function_name"]
         
         query = """
-            INSERT INTO problem (problem_name, prompt, starter_code, difficulty)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO problem (problem_name, prompt, starter_code, difficulty, function_name)
+            VALUES (%s, %s, %s, %s, %s)
         """
-        values = (name, prompt, starter_code, difficulty)
+        values = (name, prompt, starter_code, difficulty, function_name)
         cursor.execute(query, values)
 
         cursor.execute("SELECT problem_id FROM problem WHERE problem_name=%s", (name,)) # this must be a tuple, adding a comma converts it to single element tuple
