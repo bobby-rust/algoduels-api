@@ -29,11 +29,12 @@ type Account struct {
 }
 
 type Problem struct {
-	ProblemID   int    `json:"problem_id"`
-	ProblemName string `json:"problem_name"`
-	Prompt      string `json:"prompt"`
-	StarterCode string `json:"starter_code"`
-	Difficulty  uint8  `json:"difficulty"`
+	ProblemID    int    `json:"problem_id"`
+	ProblemName  string `json:"problem_name"`
+	Prompt       string `json:"prompt"`
+	StarterCode  string `json:"starter_code"`
+	Difficulty   uint8  `json:"difficulty"`
+	FunctionName string `json:"function_name"`
 }
 
 type TestCase struct {
@@ -76,10 +77,11 @@ type CreateAccountResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 type CreateProblemRequest struct {
-	ProblemName string `json:"problem_name"`
-	Prompt      string
-	StarterCode string `json:"starter_code"`
-	Difficulty  int
+	ProblemName  string `json:"problem_name"`
+	Prompt       string
+	StarterCode  string `json:"starter_code"`
+	Difficulty   int
+	FunctionName string `json:"function_name"`
 }
 
 type CreateTestCaseRequest struct {
@@ -118,12 +120,13 @@ func NewAccountRequest(username, firstName, lastName, email, password string) *C
 	}
 }
 
-func NewProblem(problemName, prompt, starterCode string, difficulty uint8) *Problem {
+func NewProblem(problemName, prompt, starterCode, functionName string, difficulty uint8) *Problem {
 	return &Problem{
-		ProblemName: problemName,
-		Prompt:      prompt,
-		StarterCode: starterCode,
-		Difficulty:  difficulty,
+		ProblemName:  problemName,
+		Prompt:       prompt,
+		StarterCode:  starterCode,
+		Difficulty:   difficulty,
+		FunctionName: functionName,
 	}
 }
 

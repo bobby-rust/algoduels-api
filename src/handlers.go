@@ -97,6 +97,7 @@ func (s *APIServer) handleGetProblems(w http.ResponseWriter, r *http.Request) er
 
 func (s *APIServer) handleGetProblemByName(w http.ResponseWriter, r *http.Request) error {
 	name := mux.Vars(r)["name"]
+	fmt.Println(name)
 	problem, err := s.store.GetProblemByName(name)
 	if err != nil {
 		return err
@@ -112,7 +113,7 @@ func (s *APIServer) handleCreateProblem(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 	defer r.Body.Close()
-	problem := NewProblem(req.ProblemName, req.Prompt, req.StarterCode, uint8(req.Difficulty))
+	problem := NewProblem(req.ProblemName, req.Prompt, req.StarterCode, req.FunctionName, uint8(req.Difficulty))
 	problemID, err := s.store.CreateProblem(problem)
 	if err != nil {
 		return err

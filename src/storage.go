@@ -565,7 +565,7 @@ func scanIntoTestCase(rows *sql.Rows) (*TestCase, error) {
 
 func scanIntoProblem(rows *sql.Rows) (*Problem, error) {
 	p := new(Problem)
-	err := rows.Scan(&p.ProblemID, &p.Prompt, &p.StarterCode, &p.Difficulty, &p.ProblemName)
+	err := rows.Scan(&p.ProblemID, &p.Prompt, &p.StarterCode, &p.Difficulty, &p.ProblemName, &p.FunctionName)
 
 	return p, err
 }
